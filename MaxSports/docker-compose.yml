@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5442:5432
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - mrlionbyte/maxsportapp:v2.1.1
+    image: mrlionbyte/maxsportapp:v2.1.1
+    volumes:
+      - static_volume:/MaxSports/staticfiles
+      - ./media:/MaxSports/media
+      - ./media:/maxsport/media:z
+      - .:/MaxSports
+    ports:
+      - 8000:8000
+    container_name: MaxSport_Container
+    depends_on:
+      - db
+    command: gunicorn -w 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50 MaxSports.wsgi:application -b 0.0.0.0:8000
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  static_volume:
+  postgres_data:
+  

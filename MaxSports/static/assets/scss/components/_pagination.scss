@@ -1,0 +1,51 @@
+/* Pagination */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: $white;
+    border: 1px solid $gray-medium;
+    border-radius: $border-radius;
+    color: $text-primary;
+    text-decoration: none;
+    transition: $transition;
+    
+    &:hover {
+      background-color: $gray-light;
+      color: $primary-blue;
+    }
+    
+    &.active {
+      background-color: $primary-blue;
+      color: $white;
+      border-color: $primary-blue;
+    }
+  }
+  
+  .prev-arrow,
+  .next-arrow {
+    font-size: 16px;
+  }
+  
+  .dot-dot {
+    border: none;
+    background: transparent;
+    color: $gray-dark;
+  }
+}
+
+
+/* pagination variations */
+@each $color, $value in $theme-colors {
+  .pagination-#{$color} {
+    @include pagination-variants($value);
+  }
+}

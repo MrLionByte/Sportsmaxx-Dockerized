@@ -1,0 +1,632 @@
+{% extends 'user/category.html' %}
+{% load static %}
+
+{% block header_name %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+					<h1>Order Details</h1>
+{% endblock header_name %}
+
+{% block section_data %}
+
+	<!--================Order Details Area =================-->
+<section class="order_details section_gap">
+    <div class="container">
+        <h3 class="title_confirmation">Your order status : <span class="text-danger">{{order_details.status}}</span></h3>
+        <div class="row order_d_inner">
+            <div class="col-lg-4">
+                <div class="details_item">
+                    <h4>Order Info</h4>
+                    <ul class="list">
+                        <li><a href="#"><span>Order number</span> : {{order_details.order.serial_number}}</a></li>
+                        <li><a href="#"><span>Order Date</span> : {{order_details.order.order_date|date:"DATE_FORMAT"}}</a></li>
+                        <li><a href="#"><span>Sub Total</span> : {{order_details.final_product_price}}</a></li>
+                        <li><a href="#"><span>Payment method</span> : {{order_details.order.payment_method}}</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="details_item">
+                    <h4>Billing Address</h4>
+                    <ul class="list">
+                        <li><a href="#"><span>Street</span> :{{order_details.order.address.area}}</a></li>
+                        <li><a href="#"><span>City</span> : {{order_details.order.address.city}}</a></li>
+                        <li><a href="#"><span>State</span> : {{order_details.order.address.state}}</a></li>
+                        <li><a href="#"><span>Postcode </span> : {{order_details.order.address.pincode}}</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="details_item">
+                    <h4>Shipping Address</h4>
+                    <ul class="list">
+                        <li><a href="#"><span>Street</span> :{{order_details.order.address.area}}</a></li>
+                        <li><a href="#"><span>City</span> : {{order_details.order.address.city}}</a></li>
+                        <li><a href="#"><span>State</span> : {{order_details.order.address.state}}</a></li>
+                        <li><a href="#"><span>Postcode </span> : {{order_details.order.address.pincode}}</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% if order_details.status == 'Order Pending' %}
+        <div class="d-flex justify-content-between">
+            <h6 class="text-warning">Order Confirmed</h6>
+            <h6 class="text-warning">Shipped</h6>
+            <h6 class="text-warning">Out for delivery</h6>
+            <h6 class="text-warning">Delivered</h6>
+        </div>
+        <div class="progress ml-5 mr-4">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: 2%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          {% elif order_details.status == 'Order confirmed' %}
+          <div class="d-flex justify-content-between">
+              <h6 class="text-success">Order Confirmed</h6>
+              <h6 class="text-warning">Shipped</h6>
+              <h6 class="text-warning">Out for delivery</h6>
+              <h6 class="text-warning">Delivered</h6>
+          </div>
+          <div class="progress ml-5 mr-4">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 2%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            {% elif order_details.status == 'Shipped' %}
+            <div class="d-flex justify-content-between">
+                <h6 class="text-success">Order Confirmed</h6>
+                <h6 class="text-success">Shipped</h6>
+                <h6 class="text-warning">Out for delivery</h6>
+                <h6 class="text-warning">Delivered</h6>
+            </div>
+            <div class="progress ml-5 mr-4">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 34%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              {% elif order_details.status == 'Out For Delivery' %}
+              <div class="d-flex justify-content-between">
+                  <h6 class="text-success">Order Confirmed</h6>
+                  <h6 class="text-success">Shipped</h6>
+                  <h6 class="text-success">Out for delivery</h6>
+                  <h6 class="text-warning">Delivered</h6>
+              </div>
+              <div class="progress ml-5 mr-4">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: 66%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            {% elif order_details.status == 'Delivered' %}
+                <div class="d-flex justify-content-between">
+                    <h6 class="text-success">Order Confirmed</h6>
+                    <h6 class="text-success">Shipped</h6>
+                    <h6 class="text-success">Out for delivery</h6>
+                    <h6 class="text-success">Delivered</h6>
+                </div>
+                <div class="progress ml-5 mr-4">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  {% elif order_details.status == 'Cancelled' %}
+                  <div class="d-flex justify-content-between">
+                      <h6 class="text-danger">Order Confirmed</h6>
+                      <h6 class="text-danger">Shipped</h6>
+                      <h6 class="text-danger">Out for delivery</h6>
+                      <h6 class="text-danger">Cancelled</h6>
+                  </div>
+                  <div class="progress ml-5 mr-4">
+                      <div class="progress-bar bg-danger" role="progressbar" style="width: 34%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    {% elif order_details.status == 'Returned' %}
+                    <div class="d-flex justify-content-between">
+                        <h6 class="text-danger">Order Confirmed</h6>
+                        <h6 class="text-danger">Shipped</h6>
+                        <h6 class="text-danger">Out for delivery</h6>
+                        <h6 class="text-danger">Returned</h6>
+                    </div>
+                    <div class="progress ml-5 mr-4">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+          {% endif %}
+<form id="payment-form" method="post" action="{% url 'initiate_payment' %}">
+            {% csrf_token %}
+          
+            <input type="text" hidden name="order_id" value="{{ order_details.order.serial_number }}">
+
+        <div class="order_details_table">
+            <div class="d-flex justify-content-between">
+            <h2>Order Details  <span class="text-info ml-4">{{order_details.order.serial_number}}</span></h2>
+            {% if order_details.status == 'Cancelled' %}
+            <h5 class="text-danger">{{order_details.status}}</h5>
+            {% elif order_details.cancel_return_confirm and order_details.status != 'Cancelled' %}
+            <h5 class="text-danger">Cancel Requested</h5>
+            {% elif order_details.status == 'Payment Pending' %}
+            <button type="button" id="pay-button" class="btn btn-outline-info">PAY</button>
+            {% elif order_details.status == 'Delivered' and not order_details.cancel_return_confirm %}
+            <a class="btn btn-outline-danger return-link" data-return-url="{% url 'cancel_order' order_id=order_details.id %}?next={{ request.path }}">Return Order</a>
+            {% elif order_details.status == 'Delivered' and order_details.cancel_return_confirm %}
+            <h5 class="text-danger">Return Requested</h5>
+            {% else %}
+            <a class="btn btn-outline-danger cancel-link" data-cancel-url="{% url 'cancel_order' order_id=order_details.id %}?next={{ request.path }}">Cancel Order</a>
+            {% endif %}
+        </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p>{{order_details.product_added}}</p>
+                            </td>
+                            <td>
+                                <h5>x {{order_details.quantity}}</h5>
+                            </td>
+                            <td>
+                                <p>{{order_details.final_product_price}}</p>
+                            </td>
+                        </tr>
+                    <thead>
+                        <tr>
+                            <th scope="col">Thumbnail</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Ordered on :<br> Delivered By :</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img style="width:200px; height: 200px;" src="{{order_details.product_added.image_first.url}}" alt="">
+                            </td>
+                            <td>
+                                <h5>{{order_details.size}}</h5>
+                            </td>
+                            <td>
+                                <h5>{{order_details.order.order_date | date:'d-m-Y'}}</h5><span class="ml-4">- - - - -</span><br>
+                                {% if not order_details.status == 'Cancelled' or order_details.status == 'Returned' %}
+                                <h5>{{order_details.expected_delivery_date | date:'d-m-Y'}}</h5>
+                                {% elif order_details.status == 'Out For Delivery' %}
+                                <h5><b>Will be delivered today</b></h5>
+                                {% elif order_details.status == 'Delivered' %}
+                                <h5>{{order_details.last_update | date:'d-m-Y'}}</h5>
+                                {% else %}
+                                <h5 class="text-danger">Cancelled</h5>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tr>
+                        <td>
+                            <h4></h4>
+                        </td>
+                        <td>
+                            <h4>This price is for all products in the cart</h4>
+                        </td>
+                    </tr>
+                        <tr>
+                            <td>
+                                <h4>Shipping</h4>
+                            </td>
+                            <td>
+                                <h5></h5>
+                            </td>
+                            <td>
+                                {% if order_details.order.total_amount < 4000 or order_details.order.amount_to_pay < 4000 %}
+                                <p>Flat rate:  150.00</p>
+                                {% else %}
+                                <p>Free For You</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <p>Coupon Applied</p>
+                            </td>
+                            <td>
+                                <p>{{order_details.order.coupon_name}}</p>
+                            </td>
+                            <td>
+                                {% if order_details.order.coupon_discount %}
+                                <p>- {{order_details.order.coupon_discount}}</p>
+                                {% else %}
+                                <p>None</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <h4>Total</h4>
+                            </td>
+                            <td>
+                                <h5></h5>
+                            </td>
+                            <td>
+                                
+                                {% if order_details.order.total_amount == 0.00 %}
+                                <input type="text" hidden name="amount" value="{{ order_details.order.amount_to_pay }}">
+
+                                <p class="text-danger">Not Payed</p>
+                                <p>Amount to pay : {{order_details.order.amount_to_pay}}</p>
+                                {% else %}
+                                <p>{{order_details.order.total_amount}}</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <input type="hidden" name="payment_mode" value="razorpay">
+    <input type="hidden" name="selected_address" value="{{ order_details.order.address }}">
+
+</form>
+
+        
+           
+            {% for order_detail in other_orders.order_all.all %}
+                {% if order_detail != order_details %}
+                <div class="order_details_table">
+
+                <div class="d-flex justify-content-between">
+                    <h2>Others Order with this <a href="{% url 'user_order_details' order_id=order_detail.id %}">
+                        <span class="text-info ml-4">{{order_detail.order.serial_number}}</span></a></h2>
+                    <h2 class="text-danger">{{order_detail.status}}</h2>
+            <!-- {% if order_detail.status == 'Cancelled' %}
+            <h5 class="text-danger">{{order_details.status}}</h5>
+            {% elif order_detail.cancel_return_confirm %}
+            <h5 class="text-danger">Cancel Requested</h5>
+            {% else %}
+            <a id="basicAlert" class="btn btn-outline-danger" href="{% url 'cancel_order' order_id=order_detail.id %}?next={{ request.path }}">Cancel Order</a>
+            {% endif %} -->
+        </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p>{{order_detail.product_added}}</p>
+                            </td>
+                            <td>
+                                <h5>x {{order_detail.quantity}}</h5>
+                            </td>
+                            <td>
+                                <p>{{order_detail.final_product_price}}</p>
+                            </td>
+                        </tr>
+                    <thead>
+                        <tr>
+                            <th scope="col">Thumbnail</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Ordered on :<br> Delivered By :</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img style="width:200px; height: 200px;" src="{{order_detail.product_added.image_first.url}}" alt="">
+                            </td>
+                            <td>
+                                <h5>{{order_detail.size}}</h5>
+                            </td>
+                            <td>
+                                <h5>{{order_detail.order.order_date | date:'d-m-Y'}}</h5><span class="ml-4">- - - - -</span><br>
+                                {% if not order_detail.status == 'Cancelled' or order_detail.status == 'Returned' %}
+                                <h5>{{order_detail.expected_delivery_date | date:'d-m-Y'}}</h5>
+                                {% elif order_detail.status == 'Out For Delivery' %}
+                                <h5><b>Will be delivered today</b></h5>
+                                {% elif order_detail.status == 'Delivered' %}
+                                <h5>{{order_detail.last_update | date:'d-m-Y'}}</h5>
+                                {% else %}
+                                <h5 class="text-danger">Cancelled</h5>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tr>
+                        <td>
+                            <h4></h4>
+                        </td>
+                        <td>
+                            <h4>This price is for all products in the cart</h4>
+                        </td>
+                    </tr>
+                        <tr>
+                            <td>
+                                <h4>Shipping</h4>
+                            </td>
+                            <td>
+                                <h5></h5>
+                            </td>
+                            <td>
+                                {% if order_detail.total_amount < 4000 or order_detail.amount_to_pay < 4000 %}
+                                <p>Flat rate:  150.00</p>
+                                {% else %}
+                                <p>Free For You</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <p>Coupon Applied</p>
+                            </td>
+                            <td>
+                                <p>{{order_detail.order.coupon_name}}</p>
+                            </td>
+                            <td>
+                                {% if order_detail.order.coupon_discount %}
+                                <p>- {{order_detail.order.coupon_discount}}</p>
+                                {% else %}
+                                <p>None</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <h4>Total</h4>
+                            </td>
+                            <td>
+                                <h5></h5>
+                            </td>
+                            <td>
+                                {% if order_detail.total_amount == 0.00 %}
+                                <p class="text-danger">Not Payed</p>
+                                <p>Amount to pay : {{order_detail.amount_to_pay}}</p>
+                                {% else %}
+                                <p>{{order_detail.total_amount}}</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            {% endif %}
+            {% endfor %}
+        
+       
+    </div>
+
+    <div class="d-flex justify-content-center mt-4"><a href="{% url 'user_orders' %}" type="button" class="btn btn-outline-primary">Go back</a></div>
+</section>
+<!--================End Order Details Area =================-->
+
+{% endblock section_data %}
+
+{% block extra_script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll('.cancel-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default behavior of the link
+    
+            let cancelUrl = this.getAttribute('data-cancel-url'); // Get the cancel URL from data attribute
+    
+            // Show SweetAlert2 dialog with a reason select box
+            Swal.fire({
+                title: "Are you sure?",
+                html: `
+                    <p>Once cancelled, you can't undo the action!</p>
+                    <select id="cancel-reason" class="swal2-select">
+                        <option value="" selected disabled>Select a reason for cancellation</option>
+                        <option value="found_a_better_price">Found a better price</option>
+                        <option value="item_not_needed">Item not needed anymore</option>
+                        <option value="order_by_mistake">Ordered by mistake</option>
+                        <option value="other">Other</option>
+                    </select>
+                `,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Cancel it!",
+                preConfirm: () => {
+                    const reason = Swal.getPopup().querySelector('#cancel-reason').value;
+                    if (!reason) {
+                        Swal.showValidationMessage('Please select a reason for cancellation');
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If user confirms cancellation, navigate to the cancel URL with the reason as a query parameter
+                    const cancelUrlWithReason = new URL(cancelUrl, window.location.origin);
+                    cancelUrlWithReason.searchParams.append('reason', result.value);
+                    window.location.href = cancelUrlWithReason;
+                }
+            });
+        });
+    });    
+    
+    document.querySelectorAll('.return-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default behavior of the link
+    
+            let cancelUrl = this.getAttribute('data-return-url'); // Get the cancel URL from data attribute
+    
+            // Show SweetAlert2 dialog with a reason select box
+            Swal.fire({
+                title: "Are you sure?",
+                html: `
+                    <p>Once returned, you can't undo the action!</p>
+                    <select id="cancel-reason" class="swal2-select">
+                        <option value="" selected disabled>Select a reason for Return</option>
+                        <option value="Product has defect or damage">Product has defect or damage</option>
+                        <option value="Received a different product">Received a different product</option>
+                        <option value="Received product does not match the description or images provided">Product not match the description</option>
+                        <option value="Ordered by mistake">Ordered by mistake</option>
+                        <option value="other">Other</option>
+                    </select>
+                `,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Return Product!",
+                preConfirm: () => {
+                    const reason = Swal.getPopup().querySelector('#cancel-reason').value;
+                    if (!reason) {
+                        Swal.showValidationMessage('Please select a reason for Returning');
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If user confirms cancellation, navigate to the cancel URL with the reason as a query parameter
+                    const cancelUrlWithReason = new URL(cancelUrl, window.location.origin);
+                    cancelUrlWithReason.searchParams.append('reason', result.value);
+                    window.location.href = cancelUrlWithReason;
+                }
+            });
+        });
+    });    
+
+
+    $(document).ready(function() {
+        $("#pay-button").click(function(e) {
+            e.preventDefault();
+    
+            const csrfToken = $("[name=csrfmiddlewaretoken]").val();
+            const orderId = $("input[name='order_id']").val();
+            const amount = $("input[name='amount']").val();
+            const paymentMode = $("input[name='payment_mode']").val();
+            const selectedAddress = $("input[name='selected_address']").val();
+    
+            const data = {
+                order_id: orderId,
+                amount: amount,
+                payment_mode: paymentMode,
+                selected_address: selectedAddress
+            };
+    
+            $.ajax({
+                type: "POST",
+                url: "{% url 'initiate_payment' %}",
+                data: data,
+                dataType: "json",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                },
+                success: function(data) {
+                    const options = {
+                        key: data.key,
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.order_id,
+                        name: data.name,
+                        description: data.description,
+                        image: data.image,
+                        handler: function(response) {
+                            if (response.razorpay_payment_id) {
+                                Swal.fire({
+                                    text: 'Payment was successful, Order placed Successfully...',
+                                    icon: 'success',
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "{% url 're_order_payment' %}",
+                                        data: {
+                                            order_id: orderId,
+                                            amount: amount
+                                        },
+                                        beforeSend: function(xhr) {
+                                            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                                        },
+                                        success: function(response) {
+                                            window.location.href = "{% url 'user_orders' %}";
+                                        },
+                                        error: function(error) {
+                                            Swal.fire({
+                                                title: 'Error!',
+                                                text: 'There was an issue updating the order. Please try again.',
+                                                icon: 'error',
+                                                showConfirmButton: true
+                                            });
+                                        }
+                                    });
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Payment failed. Please try again.',
+                                    icon: 'error',
+                                    showConfirmButton: true
+                                });
+                            }
+                        },
+                        prefill: {
+                            name: "{{ user.get_full_name }}",  // Dynamically set this value
+                            email: "{{ user.email }}",  // Dynamically set this value
+                            contact: "{{ user.profile.contact }}"  // Dynamically set this value
+                        },
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                },
+                error: function(error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an issue initiating the payment. Please try again.',
+                        icon: 'error',
+                        showConfirmButton: true
+                    });
+                }
+            });
+        });
+    });
+    
+    
+    document.querySelectorAll('.cancel-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default behavior of the link
+    
+            let cancelUrl = this.getAttribute('data-cancel-url'); // Get the cancel URL from data attribute
+    
+            // Show SweetAlert2 dialog with a reason select box
+            Swal.fire({
+                title: "Are you sure?",
+                html: `
+                    <p>Once cancelled, you can't undo the action!</p>
+                    <select id="cancel-reason" class="swal2-select">
+                        <option value="" selected disabled>Select a reason for cancellation</option>
+                        <option value="found_a_better_price">Found a better price</option>
+                        <option value="item_not_needed">Item not needed anymore</option>
+                        <option value="order_by_mistake">Ordered by mistake</option>
+                        <option value="other">Other</option>
+                    </select>
+                `,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Cancel it!",
+                preConfirm: () => {
+                    const reason = Swal.getPopup().querySelector('#cancel-reason').value;
+                    if (!reason) {
+                        Swal.showValidationMessage('Please select a reason for cancellation');
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If user confirms cancellation, navigate to the cancel URL with the reason as a query parameter
+                    const cancelUrlWithReason = new URL(cancelUrl, window.location.origin);
+                    cancelUrlWithReason.searchParams.append('reason', result.value);
+                    window.location.href = cancelUrlWithReason;
+                }
+            });
+        });
+    });    
+</script>
+{% endblock extra_script %}
