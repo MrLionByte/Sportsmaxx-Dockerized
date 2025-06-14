@@ -262,7 +262,7 @@ swal("Message", "{{ message }}"); // Display general message
 
         $.ajax({
             type: "POST",
-            url: "/initiate_payment_for_wallet/",  // Update with your correct URL
+            url: "/payment/initiate/",  // Update with your correct URL
             data: data,
             dataType: "json",
             beforeSend: function(xhr) {
@@ -290,7 +290,7 @@ swal("Message", "{{ message }}"); // Display general message
                             }).then(() => {
                                 $.ajax({
                                     type: "POST",
-                                    url: "/user/wallet/update_wallet_balance/",
+                                    url: "/wallet/update-balance/",
                                     data: {
                                         amount: amount,
                                         payment_id: response.razorpay_payment_id

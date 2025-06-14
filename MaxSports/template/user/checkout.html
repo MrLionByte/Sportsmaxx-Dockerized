@@ -297,7 +297,7 @@ swal("Message", "{{ message }}"); // Display general message
             var productId = $("#product-id").val();
     
             $.ajax({
-                url: "/add-to-wishlist/" + productId,
+                url: "/wishlist/add/" + productId,
                 type: "POST",
                 dataType: "json",
                 success: function(data) {
@@ -326,7 +326,7 @@ swal("Message", "{{ message }}"); // Display general message
                 timer: 4000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = "/payment_failure/";
+                window.location.href = "/payment-failure/";
             });
         }
     });

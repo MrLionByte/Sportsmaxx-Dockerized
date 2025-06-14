@@ -26,22 +26,26 @@ from . import settings
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("engine-room/", admin.site.urls),
+    
+    path("admin/", include("Admin_side_app.urls")),
+    path("admin/category/", include("category_app.urls")),
+    path("admin/coupons/", include("coupons_app.urls")),
+    
     path("", include("index_app.urls")),
-    path("", include("Admin_side_app.urls")),
-    path("", include("user_side.urls")),
-    path("", include("category_app.urls")),
-    path("", include("banner_app.urls")),
+    path("", include("visitors.urls")),
     path("", include("order_app.urls")),
-    path("", include("coupons_app.urls")),
     path("", include("product_app.urls")),
     path("", include("accounts.urls")),
     path("", include("cart_app.urls")),
-    path("", include("payment.urls")),
-    path("", include("offers.urls")),
-    path("", include("wallet.urls")),
-    path("", include("visitors.urls")),
+    
+    path("user/", include("user_side.urls")),
+    path("banner/", include("banner_app.urls")),
+    path("payment/", include("payment.urls")),
+    path("offers/", include("offers.urls")),
+    path("wallet/", include("wallet.urls")),
     path("accounts/", include("allauth.urls")),
+    
 ]
 
 if settings.DEBUG:

@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
 COPY requirements.txt .
 
 RUN python -m pip install --upgrade pip \
@@ -21,12 +20,13 @@ RUN python -m pip install --upgrade pip \
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput
+# Create staticfiles directory and give permissions
+RUN mkdir -p /maxsport/staticfiles && chown -R 1000:1000 /maxsport/staticfiles
 
+# Create Django user
 RUN useradd -ms /bin/bash djangouser
 USER djangouser
 
+COPY --chown=djangouser:djangouser entrypoint.sh /maxsport/entrypoint.sh
 
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-CMD ["gunicorn", "-w", "4", "MaxSports.wsgi:application", "-b", "0.0.0.0:8000"]
+ENTRYPOINT ["/maxsport/entrypoint.sh"]

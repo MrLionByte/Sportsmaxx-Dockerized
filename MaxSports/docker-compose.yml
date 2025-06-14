@@ -14,8 +14,8 @@ services:
       context: .
       dockerfile: Dockerfile
       tags:
-        - mrlionbyte/maxsportapp:v2.1.1
-    image: mrlionbyte/maxsportapp:v2.1.1
+        - mrlionbyte/maxsportapp:v2.1.2
+    image: mrlionbyte/maxsportapp:v2.1.2
     volumes:
       - static_volume:/MaxSports/staticfiles
       - ./media:/MaxSports/media

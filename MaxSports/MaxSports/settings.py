@@ -18,10 +18,12 @@ from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv()
+
+load_dotenv(dotenv_path=BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -29,7 +31,7 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
@@ -126,25 +128,13 @@ WSGI_APPLICATION = "MaxSports.wsgi.application"
 
 DATABASES=None
 
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": os.environ.get("DATABASE_NAME"),
-            "USER": os.environ.get("DATABASE_USER"),
-            "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
-            "HOST": "db",  # This should remain as "db"
-            "PORT": os.environ.get("DATABASE_PORT"),  # No need to change this
-        }
-    }
-else:
-    DATABASES = {
+DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
         ssl_require=True
-        )
-    }
+    )
+}
 
 
 # Password validation
@@ -219,6 +209,7 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
@@ -235,14 +226,13 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 
 # SMTP Email config
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_PORT = os.environ.get("EMAIL_port")
-EMAIL_HOST_USER = os.environ.get("EMAIL")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_TLS")
-EMAIL_USE_SSL = os.environ.get("EMAIL_SSL")
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
 
 
 # All Auth Backend Configuration for social media Authentication
@@ -283,12 +273,6 @@ CLOUDINARY_STORAGE = {
     'PREFIX': 'sports_max',
 }
 
-# cloudinary.config(
-#     cloud_name=os.environ.get("cloudinary_cloud_name"),
-#     api_key=os.environ.get("cloudinary_api_key"),
-#     api_secret=os.environ.get("cloudinary_api_secret"),
-#     secure=True
-# )
 
 LOGGING = {
     'version': 1,

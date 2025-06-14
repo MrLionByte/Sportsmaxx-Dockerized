@@ -187,7 +187,7 @@ swal("Message", "{{ message }}"); // Display general message
           // Get CSRF token
           var csrfToken = getCSRFToken();
           // Send data to backend using AJAX with CSRF token included in headers
-          $.ajax({
+          
               url: '/edit_product_offers/',
               method: 'POST',
               headers: {

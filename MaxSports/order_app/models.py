@@ -63,7 +63,7 @@ class Order_items(models.Model):
     final_product_price = models.DecimalField(
         max_digits=12, decimal_places=2, null=False, default=0.00
     )
-    status = models.CharField(choices=STATUS_CHOICES, default="Order Pending")
+    status = models.CharField(choices=STATUS_CHOICES, default="Order Pending", max_length=30)
     cancel_return_confirm = models.BooleanField(default=False)
     accept_order = models.BooleanField(default=True)
 

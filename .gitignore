@@ -1,0 +1,71 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
+
+# Django migrations (optional: only if you don't want to track migrations)
+# **/migrations/
+# **/migrations/*.py
+# **/migrations/*.pyc
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Environment variables
+.env
+*.env
+
+# Database / dumps
+*.sqlite3
+*.db
+*.sql
+*.bak
+
+# Media (user uploads)
+MaxSports/media/
+
+# Static files collected
+MaxSports/staticfiles/
+
+# Docker junk
+*.log
+docker-compose.override.yml
+.env.docker
+
+# VSCode & IDE files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+coverage.xml
+.coverage
+.cache
+
+# Logs
+logs/
+*.log
+
+# Node / npm junk (if any)
+node_modules/
+
+# OS generated files
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
