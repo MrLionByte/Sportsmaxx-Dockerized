@@ -36,8 +36,8 @@ user_order_patterns = [
 ]
 
 urlpatterns = [
-    path("admin/orders/", include((admin_order_patterns, "admin_order"))),
-    path("admin/reports/", include((report_patterns, "reports"))),
-    path("invoice/", include((invoice_patterns, "invoice"))),
-    path("user/orders/", include((user_order_patterns, "user_order"))),
+    path("admin/orders/", include((admin_order_patterns))),
+    path("admin/reports/", include((report_patterns))),
+    path("invoice/", include((invoice_patterns))),
+    path("user/orders/", include((user_order_patterns))),
 ]

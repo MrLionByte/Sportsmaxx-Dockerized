@@ -38,7 +38,6 @@ def cart_show(request):
         cart.save()
         user_cart = Cart.objects.get(user_id=user)
     cart_total = user_cart.total_amount
-
     available_coupons = Coupons.objects.filter(
         min_limit__lte=cart_total,
         max_limit__gte=cart_total,
@@ -67,8 +66,8 @@ def cart_show(request):
                 request,
                 f"Sorry, {product.product_color_variant.product_data_id} is currently unavailable to buy",
             )
-
     cart_all = Cart_products.objects.filter(cart=user_cart).order_by("-id")
+    
     context = {
         "user_cart": user_cart,
         "cart_all": cart_all,
@@ -192,7 +191,7 @@ def update_total_price(request):
         cart_added_item = Cart_products.objects.get(id=product_id, cart=cart)
 
         if int(quantity) > 10:
-            messages.error(request, "Maximum quantity10 is allowed")
+            messages.error(request, "Maximum quantity 10 is allowed")
             return redirect("cart_show")
         elif int(quantity) > (cart_added_item.product_color_variant.product_quantity):
             price = (
@@ -222,6 +221,7 @@ def update_total_price(request):
                 f"Sorry, only {cart_added_item.product_color_variant.product_data_id}",
             )
             return redirect("cart_show")
+        
         price = (
             cart_added_item.product_color_variant.product_data_id.product_id.product_price_after()
         )
@@ -243,6 +243,7 @@ def update_total_price(request):
                 total_amount_final += sub_total
         else:
             total_amount_final = 0.00
+        
         if total_amount_final < 4999:
             total_amount_final = total_amount_final + 150
 
@@ -250,11 +251,35 @@ def update_total_price(request):
         cart.total_amount_without_coupon = total_amount_final
         cart.save()
 
+        # Filter available coupons based on updated cart total
+        from datetime import datetime
+        date_now = datetime.now().date()  # Make sure you have this import
+        
+        available_coupons = Coupons.objects.filter(
+            min_limit__lte=total_amount_final,
+            max_limit__gte=total_amount_final,
+            expiry__gte=date_now,
+            valid_from__lte=date_now,
+            is_active=True,
+        )
+
+        # Prepare coupon data for JSON response
+        coupons_data = []
+        for coupon in available_coupons:
+            coupon_data = {
+                'code': coupon.code,
+                'title': coupon.title,
+                'discount_amount': coupon.discount_amount if coupon.discount_amount else None,
+                'discount_percentage': coupon.discount_percentage if coupon.discount_percentage else None,
+            }
+            coupons_data.append(coupon_data)
+
         return JsonResponse(
             {
                 "success": True,
                 "totalPrice": total_price,
                 "subTotal": str(total_amount_final),
+                "availableCoupons": coupons_data,
             }
         )
 
@@ -412,21 +437,26 @@ def show_wishlist(request):
 
 @login_required
 def add_to_wishlist(request, product_id):
-    storage = messages.get_messages(request)
-    storage.used = True
-
-    next_url = request.GET.get("next")
     product = product_color_image.objects.get(id=product_id)
+    created = False
 
-    if not Wishlist.objects.filter(
-        user=request.user, product_color_variant=product
-    ).exists():
-        Wishlist.objects.get_or_create(user=request.user, product_color_variant=product)
-        messages.success(request, "Product added to wishlist" + "successfully")
-        return redirect(next_url)
+    if not Wishlist.objects.filter(user=request.user, product_color_variant=product).exists():
+        Wishlist.objects.create(user=request.user, product_color_variant=product)
+        created = True
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        if created:
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'exists'}, status=400)
     else:
-        messages.error(request, "Product already exists in your wishlist.")
+        next_url = request.GET.get("next") or "/"
+        if created:
+            messages.success(request, "Product added to wishlist successfully")
+        else:
+            messages.error(request, "Product already exists in your wishlist.")
         return redirect(next_url)
+
 
 
 # ====== END ADD TO WISHLIST ====== #

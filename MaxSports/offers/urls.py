@@ -13,6 +13,6 @@ product_offer_patterns = [
 ]
 
 urlpatterns = [
-    path("category-offers/", include((category_offer_patterns, "category_offers"))),
-    path("product-offers/", include((product_offer_patterns, "product_offers"))),
+    path("category-offers/", include((category_offer_patterns))),
+    path("product-offers/", include((product_offer_patterns))),
 ]

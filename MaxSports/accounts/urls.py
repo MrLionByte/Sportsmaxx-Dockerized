@@ -17,6 +17,6 @@ checkout_address_patterns = [
 
 urlpatterns = [
     path("user-account-details/<int:user_id>/", views.user_account_details_admin, name="user_account_details_admin"),
-    path("my-account/", include((my_account_patterns, "accounts"))),
-    path("checkout/", include((checkout_address_patterns, "checkout_address"))),
+    path("my-account/", include((my_account_patterns))),
+    path("checkout/", include((checkout_address_patterns))),
 ]

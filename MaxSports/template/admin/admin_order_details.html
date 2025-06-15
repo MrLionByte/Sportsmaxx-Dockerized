@@ -165,28 +165,17 @@ swal("Message", "{{ message }}"); // Display general message
                       <p>Order not accepted</p>
                       {% else %}
                       <form id="statusForm" method="POST" action="{% url 'order_status_change' %}?next={{ request.path }}">
-                        {% csrf_token %}
-                        <input type="text" name="order_id" hidden value="{{order_details.id}}">
-                        <select id="statusSelect" name="status" onchange="showConfirmation(this)">
-                          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                            data-bs-toggle="dropdown" aria-expanded="false">Change Status</button>
+                          {% csrf_token %}
+                          <input type="hidden" name="order_id" value="{{ order_details.id }}">
+                          
+                          <select name="status" class="form-control" onchange="this.form.submit()">
+                              <option value="">-- Select Status --</option>
+                              {% for status in status_choices %}
+                                  <option value="{{ status }}" {% if status == order_details.status %}selected{% endif %}>{{ status }}</option>
+                              {% endfor %}
+                          </select>
+                      </form>
                       
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                  {% if not order_details.status == 'Delivered' %}
-                                  {% for status in status_choices %} 
-                                  <li><option value="{{ status }}">{{ status }}</option></li>
-                                  {% endfor %}
-                                  {% else %}
-                                  <li><option >Delivered</option></li>
-                                  <li><option value="Returned">Returned</option></li>
-                                  {% endif %}
-                                  {% if not status_choices %}
-                                  <li><option >No action</option></li>
-                                  {% endif %}
-                                </ul>    
-                              </select>
-                            </form>
-                        
                             {% endif %} 
                     </div>
                     

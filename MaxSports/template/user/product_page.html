@@ -95,7 +95,13 @@ swal("Message", "{{ message }}"); // Display general message
                 </div>
                 {% endif %}
             <img style="width: 255px; height: 255px; border-radius: 25px;" class="img-fluid" src="{{ data.image_first.url }}" alt=""></a>
-            <a href="{% url 'add_to_wishlist' data.pk %}?next={{request.path}}" id="add-to-wishlist-button" class="btn btn-outline-info w-75 ml-4" data-product-id="{{ data.pk }}">Add to wishlist</a>
+            
+            <a href="javascript:void(0);" 
+            class="btn btn-outline-info w-75 ml-4 add-to-wishlist-button" 
+            data-product-id="{{ data.pk }}">
+            Add to wishlist
+            </a>
+
             <div class="product-details text-center">
                 <h6 class="text-center">{{data.product_id}}</h6>
                 <div class="price">
@@ -167,6 +173,7 @@ swal("Message", "{{ message }}"); // Display general message
 	
 	{% endblock related_product_area_section_gap %}
 	{% block extra_script %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 	<script>
         $(document).ready(function() {
@@ -186,6 +193,58 @@ swal("Message", "{{ message }}"); // Display general message
 				}
 			});
 		});
+
+        $(document).ready(function() {
+            $('.add-to-wishlist-button').click(function(e) {
+                e.preventDefault();
+
+                var productId = $(this).data('product-id');
+                var url = `/wishlist/add/${productId}/`;
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            title: 'Adding to Wishlist...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added!',
+                            text: 'Product successfully added to your wishlist.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 400) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Already Exists',
+                                text: 'This product is already in your wishlist.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again later.',
+                            });
+                        }
+                    }
+                });
+            });
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             $( "#price-range" ).slider({

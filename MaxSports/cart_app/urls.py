@@ -20,8 +20,8 @@ wishlist_patterns = [
 ]
 
 urlpatterns = [
-    path("cart/", include((cart_patterns, "cart"))),
-    path("coupon/", include((coupon_patterns, "coupon"))),
+    path("cart/", include((cart_patterns))),
+    path("coupon/", include((coupon_patterns))),
     path("checkout/", views.checkout_product, name="checkout_product"),
-    path("wishlist/", include((wishlist_patterns, "wishlist"))),
+    path("wishlist/", include((wishlist_patterns))),
 ]

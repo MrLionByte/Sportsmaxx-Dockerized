@@ -10,8 +10,9 @@ admin_product_patterns = [
     path("edit/<int:product_id>/", views.admin_edit_product, name="admin_edit_product"),
     path("feature/<int:product_id>/", views.feature, name="feature"),
     path("unfeature/<int:product_id>/", views.unfeature, name="unfeature"),
-    path("edit-variant/<int:product_id>/", views.admin_edit_variant, name="admin_edit_variant"),
+    path("edit-variant/", views.admin_edit_variant, name="admin_edit_variant"),
     path("edit-image/<int:product_id>/", views.edit_product_image, name="edit_product_image"),
+    path("edit-variant/<int:product_id>/", views.admin_edit_variant, name="admin_edit_variant"),
     path("add-size-qty/", views.admin_add_size_qty, name="admin_add_size_qty"),
     path("edit-size-qty/<int:product_id>/", views.admin_edit_size_qty, name="admin_edit_size_qty"),
     path("list/<int:product_id>/", views.admin_list_product, name="admin_list_product"),
@@ -36,7 +37,10 @@ user_product_patterns = [
 ]
 
 urlpatterns = [
-    path("admin/products/", include((admin_product_patterns, "admin_product"))),
-    path("admin/products/colors/", include((admin_color_patterns, "admin_color"))),
-    path("user/products/", include((user_product_patterns, "user_product"))),
+    path("admin/products/", include((admin_product_patterns))),
+    path("admin/products/colors/", include((admin_color_patterns))),
+    path("user/products/", include((user_product_patterns))),
 ]
+
+
+

@@ -19,6 +19,6 @@ admin_types_patterns = [
 ]
 
 urlpatterns = [
-    path("", include((admin_category_patterns, "admin_category"))),
-    path("types/", include((admin_types_patterns, "admin_types_for_category"))),
+    path("", include((admin_category_patterns))),
+    path("types/", include((admin_types_patterns))),
 ]

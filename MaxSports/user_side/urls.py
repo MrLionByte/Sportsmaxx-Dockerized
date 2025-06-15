@@ -21,7 +21,7 @@ forgot_password_patterns = [
 ]
 
 urlpatterns = [
-    path("auth/", include((auth_patterns, "auth"))),
-    path("otp/", include((otp_patterns, "otp"))),
-    path("forgot-password/", include((forgot_password_patterns, "forgot_password"))),
+    path("auth/", include((auth_patterns))),
+    path("otp/", include((otp_patterns))),
+    path("forgot-password/", include((forgot_password_patterns))),
 ]

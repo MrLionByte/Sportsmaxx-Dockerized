@@ -117,11 +117,11 @@ def admin_add_product(request):
     storage.used = True
 
     if request.method == "POST":
-        product_name = request.POST.get("product_name")
+        product_name = (request.POST.get("product_name")).strip()
         category_id = request.POST.get("selected_category")
         price = request.POST.get("price")
         offer_percentage = request.POST.get("offer_percentage")
-        product_des = request.POST.get("product_description")
+        product_des = (request.POST.get("product_description")).strip()
 
         try:
             check_product = views.name_test(product_name)
@@ -335,14 +335,14 @@ def product_color_unlist(request, product_id):
 def admin_edit_product(request, product_id):
     storage = messages.get_messages(request)
     storage.used = True
-    print("In here")
+    
     next_url = request.GET.get("next")
     if request.method == "POST":
         selected_product = products.objects.get(pk=product_id)
-        product_name = request.POST.get("product_name")
+        product_name = (request.POST.get("product_name")).strip()
         product_price = request.POST.get("product_price")
         product_offer = request.POST.get("offer_percentage")
-        product_description = request.POST.get("product_description")
+        product_description = (request.POST.get("product_description")).strip()
         selected_category_id = request.POST.get("selected_category")
         if product_name:
             check_productname = views.name_test(product_name)

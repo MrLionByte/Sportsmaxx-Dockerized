@@ -50,7 +50,7 @@ def admin_coupon_add(request):
     storage.used = True
 
     if request.method == "POST":
-        coupon_title = request.POST.get("coupon_title")
+        coupon_title = (request.POST.get("coupon_title")).strip()
         min_price = request.POST.get("min_price")
         max_price = request.POST.get("max_price")
         serial_code = request.POST.get("code")
@@ -178,7 +178,7 @@ def edit_coupon(request, coupon_id):
     context = {"coupon": coupon, "coupon_id": coupon_id}
 
     if request.method == "POST":
-        coupon_title = request.POST.get("title")
+        coupon_title = (request.POST.get("title")).strip()
         min_price = request.POST.get("min")
         max_price = request.POST.get("max")
         valid = request.POST.get("valid")

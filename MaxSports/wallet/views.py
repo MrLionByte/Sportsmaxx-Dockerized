@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import Wallet_User, Wallet_transactions
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.contrib import messages
 
 # Create your views here.
@@ -29,12 +29,17 @@ def user_wallet(request):
 @login_required
 def update_wallet_balance(request):
     if request.method == "POST":
-        amount = request.session.get("wallet_amount")
-        razorpay_payment_id = request.session.get("wallet_payment_id")
+        amount_str = request.POST.get("amount")
+        razorpay_payment_id = request.POST.get("payment_id")
         user = request.user
+        
+        if not amount_str:
+            return JsonResponse({"status": "error", "message": "No amount provided."}, status=400)
+        
+        amount = Decimal(amount_str).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        
         if not Wallet_User.objects.filter(user_id=user).exists():
             wallet = Wallet_User.objects.create(user_id=user)
-            wallet.save()
 
         wallet_entry = Wallet_User.objects.get(user_id=user)
         wallet_entry.balance += Decimal(amount)

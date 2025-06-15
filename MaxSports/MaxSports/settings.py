@@ -112,7 +112,6 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 # 'index_app.context_processor.py.custom_context',
-                "django.template.context_processors.request",
                 "dynamic_breadcrumbs.context_processors.breadcrumbs",
             ],
         },
@@ -226,13 +225,13 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 
 # SMTP Email config
-EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_PORT=587
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS=True
-EMAIL_USE_SSL=False
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = str(os.environ.get("EMAIL_HOST_USER"))
+EMAIL_HOST_PASSWORD = str(os.environ.get("EMAIL_HOST_PASSWORD"))
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 
 # All Auth Backend Configuration for social media Authentication
@@ -248,14 +247,11 @@ LOGOUT_REDIRECT_URL = "/"
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
-        "SCOPE": [
-            "profile",
-            "email",
-        ],
-        "AUTH_PARAMS": {
-            "access_type": "online",
-        },
-        # 'OAUTH_PKCE_ENABLED': True,
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "secret": f"{os.environ.get("GOOGLE_SECRET")}",
+            "key": "",
+        }
     }
 }
 

@@ -80,6 +80,7 @@ def user_sign_up(request):
             if referral_code:
                 request.session["referral_code"] = referral_code
             email_otp_generator(email, request)
+            
             return redirect("otp_reg")
         except ValueError as e:
             messages.info(request, str(e))
@@ -100,14 +101,13 @@ def email_otp_generator(email, request=None):
         user = request.session.get("username_for_forgot_password")
     message1 = f"Dear {user} Your OTP for verification : {otp}"
     message2 = "Thank You for being part of Sports_Maxx "
-    send_mail(
+    status = send_mail(
         subject="Your OTP for verification",
         message=message1 + message2,
         from_email=EMAIL_HOST_USER,
         recipient_list=[email],
         fail_silently=True,
     )
-
     if request:
         request.session["expires_timer_otp"] = expires_timer_otp.isoformat()
         request.session["otp"] = otp

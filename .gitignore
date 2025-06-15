@@ -20,6 +20,10 @@ ENV/
 .env
 *.env
 
+# docker ignore
+.dockerignore
+*.dockerignore
+
 # Database / dumps
 *.sqlite3
 *.db
@@ -69,3 +73,6 @@ Desktop.ini
 *.swp
 *.swo
 *.tmp
+
+MaxSports/MS.sql
+*MaxSports/MS.sql

@@ -246,49 +246,88 @@ swal("Message", "{{ message }}"); // Display general message
         }
 
         function updateQuantity(productId, action) {
-            var quantityInput = document.getElementById("qty-" + productId);
-            var quantity = parseInt(quantityInput.value);
-        
-            if (action === 'increase' && quantity < 10) {
-                quantity++;
-            } else if (action === 'decrease' && quantity > 1) {
-                quantity--;
-            }
-        
-            quantityInput.value = quantity;
-        
-            fetch('/update_total_price/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    'quantity': quantity,
-                    'productId': productId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                  
-                    showError(data.message);
-                 
-                    quantityInput.value = data.previousQuantity;
-                } else if (data.stockError) {
-                 
-                    showError(data.message);
-               
-                    quantityInput.value = data.availableQuantity;
-                } else {
+        var quantityInput = document.getElementById("qty-" + productId);
+        var quantity = parseInt(quantityInput.value);
 
-                    document.getElementById("total_price_" + productId).innerHTML = "₹ " + data.totalPrice;
-                    document.getElementById("subtotal_display_").innerHTML = "₹ " + data.subTotal;
-                }
+        if (action === 'increase' && quantity < 10) {
+            quantity++;
+        } else if (action === 'decrease' && quantity > 1) {
+            quantity--;
+        }
+
+        quantityInput.value = quantity;
+
+        fetch('/cart/update-total/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                'quantity': quantity,
+                'productId': productId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showError(data.message);
+                quantityInput.value = data.previousQuantity;
+            } else if (data.stockError) {
+                showError(data.message);
+                quantityInput.value = data.availableQuantity;
+            } else {
+                document.getElementById("total_price_" + productId).innerHTML = "₹ " + data.totalPrice;
+                document.getElementById("subtotal_display_").innerHTML = "₹ " + data.subTotal;
+                
+                // Update available coupons dynamically
+                updateAvailableCoupons(data.availableCoupons);
+            }
             })
             .catch(error => console.error('Error:', error));
         }
         
+        function updateAvailableCoupons(coupons) {
+        // Find the coupon display container
+        const couponContainer = document.querySelector('tr td p[style*="color:black"]').parentElement;
+        
+        // Clear existing coupon display (keep the "Available Coupons :" text)
+        const existingCoupons = couponContainer.querySelectorAll('p:not([style*="color:black"])');
+        existingCoupons.forEach(coupon => coupon.remove());
+        
+        if (coupons && coupons.length > 0) {
+            // Add new coupons
+            coupons.forEach(coupon => {
+                const couponElement = document.createElement('p');
+                couponElement.onclick = function() { applyCoupon(coupon.code); };
+                couponElement.style.cursor = 'pointer';
+                
+                let discountText = '';
+                if (coupon.discount_amount) {
+                    discountText = `₹ ${coupon.discount_amount}`;
+                } else if (coupon.discount_percentage) {
+                    discountText = `${coupon.discount_percentage}%`;
+                }
+                
+                couponElement.innerHTML = `
+                    <span>${coupon.title} :</span>
+                    <span class="ml-2 text-info">${coupon.code}</span> 
+                    <span class="ml-2">Discount : ${discountText}</span>
+                    <span onclick="copyToClipboard('${coupon.code}')" style="cursor: pointer; color: blue; margin-left: 10px;">
+                        &#128203;
+                    </span>
+                `;
+                
+                    couponContainer.appendChild(couponElement);
+                    });
+                } else {
+                    // Show "No Available Coupon" message
+                    const noCouponElement = document.createElement('p');
+                    noCouponElement.className = 'text-danger';
+                    noCouponElement.textContent = 'No Available Coupon';
+                    couponContainer.appendChild(noCouponElement);
+                }
+            }
 
     document.querySelectorAll('.delete-link').forEach(link => {
         link.addEventListener('click', function(event) {

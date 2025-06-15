@@ -20,10 +20,8 @@ RUN python -m pip install --upgrade pip \
 
 COPY . .
 
-# Create staticfiles directory and give permissions
 RUN mkdir -p /maxsport/staticfiles && chown -R 1000:1000 /maxsport/staticfiles
 
-# Create Django user
 RUN useradd -ms /bin/bash djangouser
 USER djangouser
 

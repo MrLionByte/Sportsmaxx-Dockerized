@@ -119,7 +119,7 @@
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
-                  <img src="{% static 'assets/images/faces/face28.png' %}" alt="image">
+                  <img src="https://e7.pngegg.com/pngimages/682/686/png-clipart-writing-infographic-writer-homework-essay-admin-icon-thumbnail.png" alt="image">
                 </div>
                 {% if user.is_superuser %}
                 <div class="nav-profile-text">
@@ -129,7 +129,7 @@
               </a>
               <div class="dropdown-menu navbar-dropdown dropdown-menu-right p-0 border-0 font-size-sm" aria-labelledby="profileDropdown" data-x-placement="bottom-end">
                 <div class="p-3 text-center bg-primary">
-                  <img class="img-avatar img-avatar48 img-avatar-thumb" src="{% static 'assets/images/faces/face28.png' %}" alt="">
+                  <!-- <img class="img-avatar img-avatar48 img-avatar-thumb" src="{% static 'assets/images/faces/face28.png' %}" alt=""> -->
                 </div>
                 <div class="p-2">
                   <h5 class="dropdown-header text-uppercase pl-2 text-dark">User Options</h5>
@@ -164,7 +164,7 @@
                 </div>
               </div>
             </li>
-            <li class="nav-item dropdown">
+            <!-- <li class="nav-item dropdown">
               <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <i class="mdi mdi-email-outline"></i>
                 <span class="count-symbol bg-success"></span>
@@ -251,7 +251,7 @@
                 <div class="dropdown-divider"></div>
                 <h6 class="p-3 mb-0 text-center">See all notifications</h6>
               </div>
-            </li>
+            </li> -->
 
             {% block pagination %}
             <li class="nav-item nav-language dropdown d-none d-md-block">
@@ -259,19 +259,19 @@
                 {% if page_check != 'Next' %}
                 <ul class="pagination">
                   <li class="page-item active" aria-current="page">
-                    <a class="page-link" >Previous</a>
+                    <a class="page-link" >⬅</a>
                   </li>
                   <li class="page-item">
-                    <a class="page-link" href="{% url 'admin_dashboard_page' %}?page_next=Next">Next</a>
+                    <a class="page-link" href="{% url 'admin_dashboard_page' %}?page_next=Next">➡</a>
                   </li>
                 </ul>
                 {% else %}
                 <ul class="pagination">
                   <li class="page-item" aria-current="page">
-                    <a class="page-link" href="{% url 'admin_dashboard_page' %}?page_next=None">Previous</a>
+                    <a class="page-link" href="{% url 'admin_dashboard_page' %}?page_next=None">⬅</a>
                   </li>
                   <li class="page-item active">
-                    <a class="page-link" aria-current="page">Next</a>
+                    <a class="page-link" aria-current="page">➡</a>
                   </li>
                 </ul>
                 {% endif %}

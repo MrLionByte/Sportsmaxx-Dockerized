@@ -113,18 +113,7 @@ swal("Message", "{{ message }}"); // Display general message
                 </div>
               
                 <div class="d-fex justify-content-center">
-                    {% if messages  %}
-                    {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                            <h4 style="color: darkred;">{{message}}</h4>
-                            {% elif message.tags == 'success' %}
-                              <h4 style="color: green;">{{message}}</h4>
-                            {% else %}
-                                <h4 style="color: orange;">{{message}}</h4>
-                            {% endif %}
-                        
-                    {% endfor %}
-                    {% endif %} 
+                   
                 </div>
                 
 </section>

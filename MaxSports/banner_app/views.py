@@ -31,9 +31,9 @@ def add_banner(request):
 
     product = product_color_image.objects.all()
     try:
-        banner_name = request.GET.get("banner_name")
+        banner_name = (request.GET.get("banner_name")).strip()
         product_selected = request.GET.get("product")
-        product_description = request.GET.get("product_description")
+        product_description = (request.GET.get("product_description")).strip()
         expiry = request.GET.get("expiry")
         start = request.GET.get("start")
 

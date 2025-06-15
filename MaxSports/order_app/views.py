@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.db.models import Sum, aggregates
 from wallet.models import Wallet_transactions, Wallet_User
 from django.views.decorators.cache import never_cache
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.http import FileResponse
 from io import BytesIO
@@ -416,28 +416,26 @@ def order_details(request, order_id):
     storage = messages.get_messages(request)
     storage.used = True
 
-    order_details = Order_items.objects.get(id=order_id)
-    if order_details.status == "Order pending":
-        STATUS_CHOICES = None
-    elif order_details.status == "Order confirmed":
-        STATUS_CHOICES = ("Order confirmed", "Shipped", "Cancelled")
-    elif order_details.status == "Shipped":
-        STATUS_CHOICES = ("Shipped", "Out For Delivery", "Cancelled")
-    elif order_details.status == "Out For Delivery":
-        STATUS_CHOICES = ("Out For Delivery", "Delivered", "Cancelled")
-    elif order_details.status == "Delivered":
-        STATUS_CHOICES = "Returned"
-    else:
-        STATUS_CHOICES = None
-    if Cancelled_order.objects.filter(ordered_item=order_details).exists():
-        cancel = Cancelled_order.objects.get(ordered_item=order_details)
-    else:
-        cancel = None
+    try:
+        order_details = Order_items.objects.get(id=order_id)
+    except Order_items.DoesNotExist:
+        messages.error(request, "Order item not found.")
+        return redirect('order_processing')  # redirect somewhere safe
 
+    ORDER_STATUS_FLOW = {
+        "Order Pending": ["Order Confirmed", "Cancelled"],
+        "Order confirmed": ["Shipped", "Cancelled"],
+        "Shipped": ["Out For Delivery", "Cancelled"],
+        "Out For Delivery": ["Delivered", "Cancelled"],
+        "Delivered": ["Returned"],
+    }
+
+    status_choices = ORDER_STATUS_FLOW.get(order_details.status, [])
+    cancel = Cancelled_order.objects.filter(ordered_item=order_details).first()
 
     context = {
         "order_details": order_details,
-        "status_choices": STATUS_CHOICES,
+        "status_choices": status_choices,
         'cancel': cancel,
     }
     return render(request, "admin/admin_order_details.html", context)
@@ -629,13 +627,26 @@ def add_to_order(request):
 
     if request.POST:
         selected_address = request.POST.get("selected_address")
-        amount = float(request.POST.get("amount"))
+        amount_str = request.POST.get("amount")
         payment_mode = request.POST.get("payment_mode")
+            
+        if not amount_str:
+            messages.error(request, "Amount not provided.")
+            return redirect("checkout_product")
+
+        amount = Decimal(amount_str).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     else:
         selected_address = request.session["selected_address"]
-        amount = float(request.session["amount"])
+        amount_str = request.session.get("amount")
         payment_mode = request.session["payment_mode"]
+        if not amount_str:
+            messages.error(request, "Session amount not available.")
+            return redirect("checkout_product")
 
+        amount = Decimal(str(amount_str)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        
+        
     if not selected_address:
         messages.info(request, "Select address or add address")
         return redirect("checkout_product")
