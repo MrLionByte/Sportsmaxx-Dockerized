@@ -83,7 +83,7 @@ swal("Message", "{{ message }}"); // Display general message
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
-                                                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                                                <input type="hidden" name="product_id" value="{{ product.product_color_variant.pk }}">
 
                                                 {% else %}
                                                 <span class="in-stock-box">Out Stock</span>
