@@ -15,6 +15,7 @@ from django.db.models import Sum, aggregates
 from wallet.models import Wallet_transactions, Wallet_User
 from django.views.decorators.cache import never_cache
 from decimal import Decimal, ROUND_HALF_UP
+from django.db import transaction
 
 from django.http import FileResponse
 from io import BytesIO
@@ -453,17 +454,18 @@ def order_confirmation(request, order_id):
 
     next_url = request.GET.get("next")
     try:
-        order = Order_items.objects.get(id=order_id)
-        order_status = order.STATUS_CHOICES
-        order.accept_order = False
-        order.status = order_status[1][1]
-        order.save()
-        product_qty = product_sizes_variants.objects.get(
-            product_size=order.size, product_data_id=order.product_added
-        )
-        qty = product_qty.product_quantity
-        product_qty.product_quantity = qty - order.quantity
-        product_qty.save()
+        with transaction.atomic():
+            order = Order_items.objects.get(id=order_id)
+            order_status = order.STATUS_CHOICES
+            order.accept_order = False
+            order.status = order_status[1][1]
+            order.save()
+            product_qty = product_sizes_variants.objects.get(
+                product_size=order.size, product_data_id=order.product_added
+            )
+            qty = product_qty.product_quantity
+            product_qty.product_quantity = qty - order.quantity
+            product_qty.save()
     except Order_items.DoesNotExist:
         messages.error(request, "Could't change status")
     if next_url:
@@ -484,53 +486,54 @@ def order_cancel_approval(request, order_id):
 
     next_url = request.GET.get("next")
     try:
-        order = Order_items.objects.get(id=order_id)
-        cancel_order = None
-        if Cancelled_order.objects.filter(ordered_item=order).exists():
-            cancel_order = Cancelled_order.objects.get(ordered_item=order)
-        if order.status != "Delivered":
-            order_status = order.STATUS_CHOICES
-            order.cancel_return_confirm = False
-            order.status = order_status[5][1]
-            order.save()
-            if cancel_order:
-                cancel_order.pickup_date = (timezone
-                                            .now().date() + timedelta(days=2))
-                cancel_order.save()
-        else:
-            order_status = order.STATUS_CHOICES
-            order.status = order_status[6][1]
-            order.cancel_return_confirm = False
-            order.save()
-            if cancel_order:
-                cancel_order.pickup_date = (timezone
-                                            .now().date() + timedelta(days=2))
-                cancel_order.has_dispatched = True
-                cancel_order.save()
-
-        if order.order.payment_method != "cod":
-            user_wallet = Wallet_User.objects.get(user_id=order.order.user_id)
-            if order.status == "Cancelled":
-                user_transactions = Wallet_transactions(
-                    wallet_id=user_wallet,
-                    amount_received=order.order.total_amount,
-                    transaction_for="Order cancelled",
-                )
-                user_transactions.save()
+        with transaction.atomic():
+            order = Order_items.objects.get(id=order_id)
+            cancel_order = None
+            if Cancelled_order.objects.filter(ordered_item=order).exists():
+                cancel_order = Cancelled_order.objects.get(ordered_item=order)
+            if order.status != "Delivered":
+                order_status = order.STATUS_CHOICES
+                order.cancel_return_confirm = False
+                order.status = order_status[5][1]
+                order.save()
+                if cancel_order:
+                    cancel_order.pickup_date = (timezone
+                                                .now().date() + timedelta(days=2))
+                    cancel_order.save()
             else:
-                user_transactions = Wallet_transactions(
-                    wallet_id=user_wallet,
-                    amount_received=order.order.total_amount,
-                    transaction_for="Order Returned",
-                )
-                user_transactions.save()
+                order_status = order.STATUS_CHOICES
+                order.status = order_status[6][1]
+                order.cancel_return_confirm = False
+                order.save()
+                if cancel_order:
+                    cancel_order.pickup_date = (timezone
+                                                .now().date() + timedelta(days=2))
+                    cancel_order.has_dispatched = True
+                    cancel_order.save()
 
-        product_qty = product_sizes_variants.objects.get(
-            product_size=order.size, product_data_id=order.product_added
-        )
-        qty = product_qty.product_quantity
-        product_qty.product_quantity = qty + order.quantity
-        product_qty.save()
+            if order.order.payment_method != "cod":
+                user_wallet = Wallet_User.objects.get(user_id=order.order.user_id)
+                if order.status == "Cancelled":
+                    user_transactions = Wallet_transactions(
+                        wallet_id=user_wallet,
+                        amount_received=order.order.total_amount,
+                        transaction_for="Order cancelled",
+                    )
+                    user_transactions.save()
+                else:
+                    user_transactions = Wallet_transactions(
+                        wallet_id=user_wallet,
+                        amount_received=order.order.total_amount,
+                        transaction_for="Order Returned",
+                    )
+                    user_transactions.save()
+
+            product_qty = product_sizes_variants.objects.get(
+                product_size=order.size, product_data_id=order.product_added
+            )
+            qty = product_qty.product_quantity
+            product_qty.product_quantity = qty + order.quantity
+            product_qty.save()
     except Order_items.DoesNotExist:
         messages.error(request, "Could't change status")
     if next_url:
@@ -554,21 +557,22 @@ def order_status_change(request):
         status = request.POST.get("status")
         order_id = request.POST.get("order_id")
         try:
-            order = Order_items.objects.get(id=order_id)
-            order.status = status
-            order.save()
-            if status == "Cancelled" or status == "Returned":
-                order.cancel_return_confirm = False
-                order.accept_order = False
+            with transaction.atomic():
+                order = Order_items.objects.get(id=order_id)
+                order.status = status
                 order.save()
-                if order.order.payment_method != "cod":
-                    user_wallet = Wallet_User.objects.get(user_id=order.order.user_id)
-                    user_transactions = Wallet_transactions(
-                        wallet_id=user_wallet,
-                        amount_received=order.order.total_amount,
-                        transaction_for="Order cancelled",
-                    )
-                    user_transactions.save()
+                if status == "Cancelled" or status == "Returned":
+                    order.cancel_return_confirm = False
+                    order.accept_order = False
+                    order.save()
+                    if order.order.payment_method != "cod":
+                        user_wallet = Wallet_User.objects.get(user_id=order.order.user_id)
+                        user_transactions = Wallet_transactions(
+                            wallet_id=user_wallet,
+                            amount_received=order.order.total_amount,
+                            transaction_for="Order cancelled",
+                        )
+                        user_transactions.save()
 
         except Order_items.DoesNotExist:
             messages.error(request, "Could't change status")
@@ -620,9 +624,7 @@ def add_to_order(request):
     storage = messages.get_messages(request)
     storage.used = True
 
-    if not Wallet_User.objects.filter(user_id=request.user).exists():
-        Wallet_User.objects.create(user_id=request.user)
-
+    Wallet_User.objects.get_or_create(user_id=request.user)
     user_in_action = request.user
 
     if request.POST:
@@ -666,82 +668,86 @@ def add_to_order(request):
         return redirect("checkout_product")
 
     try:
-        address = user_address.objects.get(id=selected_address)
-        users_cart = Cart.objects.get(user_id=user_in_action)
-        users_cart_varients_products = Cart_products.objects.filter(cart=users_cart)
+        with transaction.atomic():
+            address = user_address.objects.get(id=selected_address)
+            users_cart = Cart.objects.get(user_id=user_in_action)
+            users_cart_varients_products = Cart_products.objects.filter(cart=users_cart)
 
-        order_data = Order(
-            user_id=user_in_action,
-            address=address,
-            payment_method=payment_mode,
-            total_amount=amount
-        )
-        if users_cart.coupon_active:
-            order_data.coupon_name = users_cart.coupon.title
-            if users_cart.coupon.discount_amount is not None:
-                order_data.coupon_discount = "₹ " + str(users_cart.coupon.discount_amount)
-            else:
-                order_data.coupon_discount = "% " + str(users_cart.coupon.discount_percentage)
-        if amount == 0.00:
-            order_data.amount_to_pay = users_cart.total_amount
-        try:
-            order_data.full_clean()
-            order_data.save()
-        except ValidationError as ve:
-            messages.error(request, "Order Error: " + str(ve))
-            return redirect("cart_show")
-
-        if order_data.payment_method == "wallet":
-            user_wallet = Wallet_User.objects.get(user_id=user_in_action)
-            user_wallet.balance -= order_data.total_amount
-            user_wallet.save()
-            wallet_history = Wallet_transactions.objects.create(
-                wallet=user_wallet,
-                transaction_for="Order using wallet",
-                amount_received=Decimal(order_data.total_amount)
+            order_data = Order(
+                user_id=user_in_action,
+                address=address,
+                payment_method=payment_mode,
+                total_amount=amount
             )
-            wallet_history.save()
-
-        request.session["order_sl_no"] = str(order_data.serial_number)
-
-        count = 0
-
-        for data in users_cart_varients_products:
-            order_item = Order_items(
-                order=order_data,
-                product_added=data.product_color_variant.product_data_id,
-                quantity=data.quantity,
-                size=data.product_color_variant.product_size,
-                final_product_price=data.sub_total,
-                status="Order Pending",
-            )
+            if users_cart.coupon_active:
+                order_data.coupon_name = users_cart.coupon.title
+                if users_cart.coupon.discount_amount is not None:
+                    order_data.coupon_discount = "₹ " + str(users_cart.coupon.discount_amount)
+                else:
+                    order_data.coupon_discount = "% " + str(users_cart.coupon.discount_percentage)
             if amount == 0.00:
-                (amount)
-                order_item.accept_order=False
-                order_item.status = "Payment Pending"
-            order_item.save()
-            (order_item.status)
-            count += 1
-       
-        if count > 0:
-            users_cart.delete()
-            return redirect("order_confirm")
+                order_data.amount_to_pay = users_cart.total_amount
+            try:
+                order_data.full_clean()
+                order_data.save()
+            except ValidationError as ve:
+                messages.error(request, "Order Error: " + str(ve))
+                return redirect("cart_show")
 
-        order_data.delete()
-        messages.error(
-            request, "Cannot confirm order. Sorry for the inconvenience. Try again."
-        )
+            if order_data.payment_method == "wallet":
+                user_wallet = Wallet_User.objects.get(user_id=user_in_action)
+                user_wallet.balance -= order_data.total_amount
+                user_wallet.save()
+                wallet_history = Wallet_transactions.objects.create(
+                    wallet=user_wallet,
+                    transaction_for="Order using wallet",
+                    amount_received=Decimal(order_data.total_amount)
+                )
+                wallet_history.save()
+
+            request.session["order_sl_no"] = str(order_data.serial_number)
+
+            count = 0
+
+            for data in users_cart_varients_products:
+                order_item = Order_items(
+                    order=order_data,
+                    product_added=data.product_color_variant.product_data_id,
+                    quantity=data.quantity,
+                    size=data.product_color_variant.product_size,
+                    final_product_price=data.sub_total,
+                    status="Order Pending",
+                )
+                if amount == 0.00:
+                    (amount)
+                    order_item.accept_order=False
+                    order_item.status = "Payment Pending"
+                order_item.save()
+                (order_item.status)
+                count += 1
+        
+            if count > 0:
+                users_cart.delete()
+                request.session["order_sl_no"] = str(order_data.serial_number)
+                return redirect("order_confirm")
+
+             raise ValueError("No valid items found in cart.")
+
+            
     except Cart.DoesNotExist:
         messages.error(request, "Cart does not exist.")
         return redirect("cart_show")
     except user_address.DoesNotExist:
-        messages.error(
-            request, "Selected address not found. Please choose a valid address."
-        )
+        messages.error(request, "Selected address not found.")
+    except ValidationError as ve:
+        messages.error(request, "Order validation failed: " + str(ve))
+    except ValueError as ve:
+        messages.error(request, "Transaction failed: " + str(ve))
     except Exception as e:
-        messages.error(request, "An unexpected error occurred: " + str(e))
+        messages.error(request, "Unexpected error: " + str(e))
 
     return JsonResponse({"message": "Order could not be processed."})
+
 
 #  <  ===========   End Add order ===========   > #
 
@@ -831,11 +837,12 @@ def cancel_order(request, order_id):
     reason = request.GET.get('reason')
 
     try:
-        order_item = Order_items.objects.get(id=order_id)
-        order_item.cancel_return_confirm = True
-        order_item.save()
-        cancel_order = Cancelled_order(ordered_item=order_item,user=request.user,reason=reason)
-        cancel_order.save()
+        with transaction.atomic():
+            order_item = Order_items.objects.get(id=order_id)
+            order_item.cancel_return_confirm = True
+            order_item.save()
+            cancel_order = Cancelled_order(ordered_item=order_item,user=request.user,reason=reason)
+            cancel_order.save()
     except Order_items.DoesNotExist:
         messages.error(request, "Couldn't cancel order, try again")
 
