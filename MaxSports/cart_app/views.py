@@ -17,6 +17,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from order_app.models import Order
 from django.db.models import Q, Subquery
 from django.views.decorators.cache import never_cache
+from datetime import datetime
 
 # Create your views here.
 logger = logging.getLogger(__name__)
@@ -192,112 +193,94 @@ def remove_from_cart(request):
 
 # ====== UPDATE TOTAL PRICE  ====== #
 
-
 @login_required
 def update_total_price(request):
     storage = messages.get_messages(request)
     storage.used = True
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return redirect("cart_show")
+
+    try:
         data = json.loads(request.body)
-        quantity = data.get("quantity")
+        quantity = int(data.get("quantity"))
         product_id = data.get("productId")
         user = request.user
+
         cart = Cart.objects.get(user_id=user)
-        cart_added_item = Cart_products.objects.get(id=product_id, cart=cart)
+        cart_item = Cart_products.objects.get(id=product_id, cart=cart)
+    except (Cart.DoesNotExist, Cart_products.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({"stockError": True, "message": "Invalid cart item."})
 
-        if int(quantity) > 10:
-            messages.error(request, "Maximum quantity 10 is allowed")
-            return redirect("cart_show")
-        elif int(quantity) > (cart_added_item.product_color_variant.product_quantity):
-            price = (
-                cart_added_item.product_color_variant.product_data_id.product_id.product_price_after()
-            )
-            total_price = quantity * price
+    product_variant = cart_item.product_color_variant
+    available_stock = product_variant.product_quantity
+    price = product_variant.product_data_id.product_id.product_price_after()
 
-            cart_added_item.quantity = quantity
-            cart_added_item.sub_total = total_price
-            cart_added_item.save()
-            return JsonResponse(
-                {
-                    "stockError": True,
-                    "message": "Sorry, only "
-                    + str(cart_added_item.product_color_variant.product_quantity)
-                    + " left in stock",
-                    "availableQuantity": cart_added_item.product_color_variant.product_quantity,
-                }
-            )
-        elif (
-            not cart_added_item.product_color_variant.product_data_id.status
-            or cart_added_item.product_color_variant.product_data_id.delete_opt
-        ):
-            cart_added_item.delete()
-            messages.error(
-                request,
-                f"Sorry, only {cart_added_item.product_color_variant.product_data_id}",
-            )
-            return redirect("cart_show")
-        
-        price = (
-            cart_added_item.product_color_variant.product_data_id.product_id.product_price_after()
-        )
-        total_price = quantity * price
+    if quantity > 10 and available_stock > 10:
+        quantity = 10
+    elif quantity > available_stock:
+        quantity = available_stock
 
-        cart_added_item.quantity = quantity
-        cart_added_item.sub_total = total_price
-        cart_added_item.save()
+    if not product_variant.product_data_id.status or product_variant.product_data_id.delete_opt:
+        cart_item.delete()
+        return JsonResponse({
+            "stockError": True,
+            "message": "Product is no longer available.",
+        })
 
-        all_cart_items = Cart_products.objects.filter(cart=cart)
-        if all_cart_items:
-            total_amount_final = 0.00
-            for cart_item in all_cart_items:
-                product_price = (
-                    cart_item.product_color_variant.product_data_id.product_id.product_price_after()
-                )
-                quantity = cart_item.quantity
-                sub_total = product_price * quantity
-                total_amount_final += sub_total
-        else:
-            total_amount_final = 0.00
-        
-        if total_amount_final < 4999:
-            total_amount_final = total_amount_final + 150
+    total_price = quantity * price
+    cart_item.quantity = quantity
+    cart_item.sub_total = total_price
+    cart_item.save()
 
-        cart.total_amount = total_amount_final
-        cart.total_amount_without_coupon = total_amount_final
-        cart.save()
+    all_cart_items = Cart_products.objects.filter(cart=cart)
+    total_amount_final = 0.00
+    for item in all_cart_items:
+        item_price = item.product_color_variant.product_data_id.product_id.product_price_after()
+        total_amount_final += item.quantity * item_price
 
-        from datetime import datetime
-        date_now = datetime.now().date()
-        
-        available_coupons = Coupons.objects.filter(
-            min_limit__lte=total_amount_final,
-            max_limit__gte=total_amount_final,
-            expiry__gte=date_now,
-            valid_from__lte=date_now,
-            is_active=True,
-        )
+    if total_amount_final < 4999:
+        total_amount_final += 150
 
-        coupons_data = []
-        for coupon in available_coupons:
-            coupon_data = {
-                'code': coupon.code,
-                'title': coupon.title,
-                'discount_amount': coupon.discount_amount if coupon.discount_amount else None,
-                'discount_percentage': coupon.discount_percentage if coupon.discount_percentage else None,
-            }
-            coupons_data.append(coupon_data)
+    cart.total_amount = total_amount_final
+    cart.total_amount_without_coupon = total_amount_final
+    cart.save()
 
-        return JsonResponse(
-            {
-                "success": True,
-                "totalPrice": total_price,
-                "subTotal": str(total_amount_final),
-                "availableCoupons": coupons_data,
-            }
-        )
+    date_now = datetime.now().date()
+    available_coupons = Coupons.objects.filter(
+        min_limit__lte=total_amount_final,
+        max_limit__gte=total_amount_final,
+        expiry__gte=date_now,
+        valid_from__lte=date_now,
+        is_active=True,
+    )
 
-    return redirect("cart_show")
+    coupons_data = []
+    for coupon in available_coupons:
+        coupons_data.append({
+            "code": coupon.code,
+            "title": coupon.title,
+            "discount_amount": coupon.discount_amount if coupon.discount_amount else None,
+            "discount_percentage": coupon.discount_percentage if coupon.discount_percentage else None,
+        })
+
+    if quantity != int(data.get("quantity")):
+        return JsonResponse({
+            "stockError": True,
+            "message": f"Only {quantity} item(s) available.",
+            "availableQuantity": quantity,
+            "totalPrice": total_price,
+            "subTotal": str(total_amount_final),
+            "updatedQuantity": quantity,
+            "availableCoupons": coupons_data,
+        })
+
+    return JsonResponse({
+        "success": True,
+        "totalPrice": total_price,
+        "subTotal": str(total_amount_final),
+        "availableCoupons": coupons_data,
+    })
 
 
 # ====== END UPDATE TOTAL PRICE ====== #

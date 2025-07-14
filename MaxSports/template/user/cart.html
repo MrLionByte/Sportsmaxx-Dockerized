@@ -232,10 +232,9 @@ function showSuccess(message) {
 function updateQuantity(productId, action) {
     const quantityInput = document.getElementById("qty-" + productId);
     let quantity = parseInt(quantityInput.value);
-    if (action === 'increase' && quantity < 10) quantity++;
-    else if (action === 'decrease' && quantity > 1) quantity--;
 
-    quantityInput.value = quantity;
+    if (action === 'increase') quantity++;
+    else if (action === 'decrease' && quantity > 1) quantity--;
 
     const loader = document.getElementById("loading-overlay");
     loader.style.display = "flex";
@@ -254,12 +253,28 @@ function updateQuantity(productId, action) {
     .then(response => response.json())
     .then(data => {
         loader.style.display = "none";
-        if (data.error) {
+
+        if (data.stockError) {
             showError(data.message);
-            quantityInput.value = data.previousQuantity;
+        }
+
+        if (data.availableQuantity !== undefined) {
+            quantityInput.value = data.availableQuantity;
+        } else if (data.updatedQuantity !== undefined) {
+            quantityInput.value = data.updatedQuantity;
         } else {
+            quantityInput.value = quantity;
+        }
+
+        if (data.totalPrice !== undefined) {
             document.getElementById("total_price_" + productId).innerHTML = "₹ " + data.totalPrice;
+        }
+
+        if (data.subTotal !== undefined) {
             document.getElementById("subtotal_display_").innerHTML = "₹ " + data.subTotal;
+        }
+
+        if (data.availableCoupons) {
             updateAvailableCoupons(data.availableCoupons);
         }
     })
@@ -268,6 +283,7 @@ function updateQuantity(productId, action) {
         console.error('Error:', error);
     });
 }
+
 
 document.getElementById('apply-coupon-btn').addEventListener('click', function (e) {
     e.preventDefault();
