@@ -730,6 +730,7 @@ def add_to_order(request):
                 users_cart.delete()
                 request.session["order_sl_no"] = str(order_data.serial_number)
                 return redirect("order_confirm")
+            
             raise ValueError("No valid items found in cart.")
 
             

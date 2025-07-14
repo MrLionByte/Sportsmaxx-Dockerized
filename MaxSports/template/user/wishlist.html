@@ -14,21 +14,21 @@
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 {% if messages %}
-{% for message in messages %}
-{% if message.tags == 'error' %}
-<script>
-swal("Error!", "{{ message }}", "error"); // Display error message with a warning icon
-</script>
-{% elif message.tags == 'success' %}
-<script>
-swal("Success!", "{{ message }}", "success"); // Display success message with a success icon
-</script>
-{% else %}
-<script>
-swal("Message", "{{ message }}"); // Display general message
-</script>
-{% endif %}
-{% endfor %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <script>
+                swal("Error!", "{{ message }}", "error");
+            </script>
+        {% elif message.tags == 'success' %}
+            <script>
+                swal("Success!", "{{ message }}", "success");
+            </script>
+        {% else %}
+            <script>
+                swal("Message", "{{ message }}");
+            </script>
+        {% endif %}
+    {% endfor %}
 {% endif %}
 
 <section class="cart_area">

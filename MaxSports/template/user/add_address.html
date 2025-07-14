@@ -27,93 +27,95 @@
               </div>
               <hr>
               {% if check_out %}
-              <form action="{% url 'checkout_product' %}" method="post">
+              <form action="{% url 'add_checkout_address' %}" method="post">
                 {% csrf_token %}
               {% else %}
-              <form action="{% url 'add_account_address' %}" method="post">
-                {% csrf_token %}             
-                {% endif %}
-                <div class="m-3">
-                  <label for="exampleInputEmail1" class="form-label">Enter Full name to contact</label>
-                <input type="text" name="full_name" class="form-control" maxlength="50"
-                id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                </div>
-                <div class="mb-3 d-flex justify-content-between">
-                  <div class="col-6 w-75">
-                <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                <input type="text" inputmode="numeric" name="phone" class="form-control" maxlength="10"
-                id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                  </div>
-                  <div class="col-6 w-75">
-                    <label for="exampleInputEmail1" class="form-label">Alternative Number</label>
-                    <input type="text" inputmode="numeric" name="alt_ph" class="form-control" maxlength="10"
-                    id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                      </div>
-                    </div>
+<form action="{% url 'add_account_address' %}" method="post" autocomplete="on">
+  {% csrf_token %}
+{% endif %}
+  <div class="m-3">
+    <label for="full_name" class="form-label">Enter Full name to contact</label>
+    <input type="text" name="full_name" id="full_name" class="form-control" maxlength="50"
+           autocomplete="name" required>
+  </div>
 
-                <div class="mb-3 d-flex justify-content-between">
-                    <div class="col-6 w-75">
-                  <label for="exampleInputEmail1" class="form-label">Pincode</label>
-                  <input type="text" inputmode="numeric" name="pincode" class="form-control" maxlength="6"
-                  id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                    </div>
-                    <div class="col-6 w-75">
-                  <label for="exampleInputEmail1" class="form-label">post_office</label>
-                  <input type="text" name="post_office" class="form-control" 
-                  id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                      </div>
-                </div>
+  <div class="mb-3 d-flex justify-content-between">
+    <div class="col-6 w-75">
+      <label for="phone" class="form-label">Phone Number</label>
+      <input type="text" inputmode="numeric" name="phone" id="phone" class="form-control" maxlength="10"
+             autocomplete="tel" required>
+    </div>
+    <div class="col-6 w-75">
+      <label for="alt_ph" class="form-label">Alternative Number</label>
+      <input type="text" inputmode="numeric" name="alt_ph" id="alt_ph" class="form-control" maxlength="10"
+             autocomplete="tel" required>
+    </div>
+  </div>
 
-                <div class="mb-3 d-flex justify-content-between">
-                      <div class="col-6 w-75">
-                  <label for="exampleInputPassword1" class="form-label">Landmark</label>
-                  <input type="text" name="landmark" class="form-control"
-                    id="exampleInputPassword1" >
-                    </div>
-                    <div class="col-6 w-75">
-                  <label for="exampleInputPassword1" class="form-label">Flat, House no., Building, Company, Apartment</label>
-                  <input type="text" name="accessible" class="form-control"
-                    id="exampleInputPassword1" required>
-                    </div>
-                </div>
+  <div class="mb-3 d-flex justify-content-between">
+    <div class="col-6 w-75">
+      <label for="pincode" class="form-label">Pincode</label>
+      <input type="text" inputmode="numeric" name="pincode" id="pincode" class="form-control" maxlength="6"
+             autocomplete="postal-code" required>
+    </div>
+    <div class="col-6 w-75">
+      <label for="post_office" class="form-label">Post Office</label>
+      <input type="text" name="post_office" id="post_office" class="form-control"
+             autocomplete="address-line2" required>
+    </div>
+  </div>
 
-                <div class="ml-5 mr-5 form-check d-flex justify-content-between">
+  <div class="mb-3 d-flex justify-content-between">
+    <div class="col-6 w-75">
+      <label for="landmark" class="form-label">Landmark</label>
+      <input type="text" name="landmark" id="landmark" class="form-control"
+             autocomplete="landmark">
+    </div>
+    <div class="col-6 w-75">
+      <label for="accessible" class="form-label">Flat, House no., Building, Company, Apartment</label>
+      <input type="text" name="accessible" id="accessible" class="form-control"
+             autocomplete="address-line1" required>
+    </div>
+  </div>
 
-                    <label for="location1">
-                    <input type="radio" id="location1" name="address_type" value="home" required/>
-                    Home</label>
-                    <label for="location2">
-                    <input type="radio" id="location2" name="address_type" value="office" required/>
-                    Office</label>
-                    <label for="location3">
-                    <input type="radio" id="location3" name="address_type" value="other" required/>
-                      Other</label>
+  <div class="ml-5 mr-5 form-check d-flex justify-content-between">
+    <label for="location1">
+      <input type="radio" id="location1" name="address_type" value="home" required/>
+      Home
+    </label>
+    <label for="location2">
+      <input type="radio" id="location2" name="address_type" value="office" required/>
+      Office
+    </label>
+    <label for="location3">
+      <input type="radio" id="location3" name="address_type" value="other" required/>
+      Other
+    </label>
+  </div>
 
-                </div>               
+  <div class="mb-3 d-flex justify-content-between">
+    <div class="col-4">
+      <label for="area" class="form-label">Area, Street, Sector, Village</label>
+      <input type="text" name="area" id="area" class="form-control"
+             autocomplete="address-line2" required>
+    </div>
+    <div class="col-4">
+      <label for="state" class="form-label">State</label>
+      <input type="text" name="state" id="state" class="form-control"
+             autocomplete="address-level1" required>
+    </div>
+    <div class="col-4">
+      <label for="city" class="form-label">City</label>
+      <input type="text" name="city" id="city" class="form-control"
+             autocomplete="address-level2" required>
+    </div>
+  </div>
 
-                <div class="mb-3 d-flex justify-content-between">
-                  <div class="col-4">
-                  <label for="exampleInputEmail1" class="form-label">Area, Street, Sector, Village</label>
-                  <input type="text" name="area" class="form-control" 
-                  id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                </div>
-                <div class="col-4">
-                  <label for="exampleInputEmail1" class="form-label">State</label>
-                  <input type="text" name="state" class="form-control" 
-                  id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                </div>
-                <div class="col-4">
-                  <label for="exampleInputEmail1" class="form-label">City</label>
-                  <input type="text" name="city" class="form-control"
-                  id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                </div>
-              </div>
-
-              <div class="m-3">
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </div>
-              
-            </form>
+  <div class="m-3">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+            
             <div class="d-flex justify-content-center">
             {% if messages  %}
             {% for message in messages %}

@@ -12,6 +12,8 @@ from all_validator.views import is_image, name_test
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from order_app.models import Order_items
 from all_validator import views
+from django.template.loader import render_to_string
+from django.http import JsonResponse
 
 # from django.db.models import Subquery, OuterRef, FloatField
 
@@ -651,45 +653,35 @@ def admin_edit_size_qty(request, product_id):
 
 #   ======== All Products ========   #
 
-
 def all_products_list(request):
-    storage = messages.get_messages(request)
-    storage.used = True
+    query_params = request.GET
+    search_query = query_params.get("search", "")
+    color = query_params.get("color")
+    variant_name = query_params.get("variant_name")
+    category_id = query_params.get("category_name") or query_params.get("category")
+    lower_value = query_params.get("lower_value")
+    upper_value = query_params.get("upper_value")
+    sort_id = query_params.get("sort_id")
+    page_number = query_params.get("page", 1)
 
-    search_query = request.POST.get("search", "")
-    filter_query = request.POST.get("filter")
-    page_number = request.GET.get("page")
+    print(f"Data incoming , Query: {query_params}")
+    print(f"XXXX , search_query: {search_query}, color: {color}, variant_name: {variant_name}, category_id :{category_id}")
+    print(f"YYYY , lower_value: {lower_value}, upper_value: {upper_value}, sort_id: {sort_id}, page_number :{page_number}")
+    
+    filters = {
+        "delete_opt": False,
+        "status": True,
+        "product_id__product_delete": False,
+        "product_id__product_list": True,
+    }
 
     if search_query:
         product = product_color_image.objects.filter(
-            Q(
-                product_id__product_name__icontains=search_query,
-                delete_opt=False,
-                status=True,
-                product_id__product_delete=False,
-                product_id__product_list=True,
-            )
-            | Q(
-                product_id__product_price__icontains=search_query,
-                delete_opt=False,
-                status=True,
-                product_id__product_delete=False,
-                product_id__product_list=True,
-            )
+            Q(product_id__product_name__icontains=search_query) |
+            Q(product_id__product_price__icontains=search_query),
+            **filters
         )
-
-    elif filter_query:
-        variant_name = request.POST.get("variant_name")
-        color = request.POST.get("color")
-        category_id = request.POST.get("category_name")
-        lower_value = request.POST.get("lower_value")
-        upper_value = request.POST.get("upper_value")
-        filters = {
-            "delete_opt": False,
-            "status": True,
-            "product_id__product_delete": False,
-            "product_id__product_list": True,
-        }
+    else:
         if color:
             filters["product_color"] = color
         if category_id:
@@ -702,108 +694,48 @@ def all_products_list(request):
             filters["product_id__product_price__gte"] = lower_value
         elif upper_value:
             filters["product_id__product_price__lte"] = upper_value
-        product = product_color_image.objects.filter(**filters).order_by("id")
-    else:
-        try:
-            sort_id = request.GET.get("sort_id", None)
 
-            sort_id = int(sort_id)
-            if sort_id == 1:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("-product_id__product_added_at")
+        product = product_color_image.objects.filter(**filters)
 
-            elif sort_id == 2:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("-product_id__product_price")
-            elif sort_id == 3:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("product_id__product_price")
-            elif sort_id == 4:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("product_id__product_name")
-            elif sort_id == 5:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("-product_id__product_name")
-            elif sort_id == 6:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                    featured=True,
-                ).order_by("-product_id__product_name")
-            else:
-                product = product_color_image.objects.filter(
-                    delete_opt=False,
-                    status=True,
-                    product_id__product_delete=False,
-                    product_id__product_list=True,
-                ).order_by("-product_id__product_added_at")
-        except ValueError:
-            product = product_color_image.objects.filter(
-                delete_opt=False,
-                status=True,
-                product_id__product_delete=False,
-                product_id__product_list=True,
-            ).order_by("product_id__product_added_at")
+    # Sorting
+    if sort_id:
+        sort_id = int(sort_id)
+        if sort_id == 1:
+            product = product.order_by("-product_id__product_added_at")
+        elif sort_id == 2:
+            product = product.order_by("-product_id__product_price")
+        elif sort_id == 3:
+            product = product.order_by("product_id__product_price")
+        elif sort_id == 4:
+            product = product.order_by("product_id__product_name")
+        elif sort_id == 5:
+            product = product.order_by("-product_id__product_name")
+        elif sort_id == 6:
+            product = product.filter(featured=True)
 
-        except TypeError:
-            product = product_color_image.objects.filter(
-                delete_opt=False,
-                status=True,
-                product_id__product_delete=False,
-                product_id__product_list=True,
-            ).order_by("product_id__product_added_at")
-
-    all_products = product_color_image.objects.all()
-    variant_names = [
-        product.product_variant_name
-        for product in all_products
-        if product.product_variant_name
-    ]
-    color_names = [
-        product.product_color for product in all_products if product.product_color
-    ]
-    unique_color_names = list(set(color_names))
-    unique_variant_names = list(set(variant_names))
-
-    product = Paginator(product, 12)
+    all_products = product_color_image.objects.filter(**filters)
+    variant_names = list(set([p.product_variant_name for p in all_products if p.product_variant_name]))
+    color_names = list(set([p.product_color for p in all_products if p.product_color]))
+    
+    paginator = Paginator(product, 12)
     try:
-        page_obj = product.get_page(page_number)
-    except PageNotAnInteger:
-        page_obj = product.page(1)
-    except EmptyPage:
-        page_obj = product.page(product.num_pages)
+        page_obj = paginator.get_page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
 
     context = {
         "all_products": page_obj,
-        "category_data": category.objects.filter(
-            is_listed=True, category_delete=True
-        ).order_by("id"),
-        "unique_variant_names": unique_variant_names,
-        "unique_color_names": unique_color_names,
+        "category_data": category.objects.filter(is_listed=True, category_delete=True).order_by("id"),
+        "unique_variant_names": variant_names,
+        "unique_color_names": color_names,
     }
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        html = render_to_string("user/partials/product_list.html", context)
+        return JsonResponse({"success": True, "html": html})
+
     return render(request, "user/category.html", context)
+
 
 
 # ========  End all Products  ======== #

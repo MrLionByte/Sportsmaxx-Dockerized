@@ -14,19 +14,19 @@ services:
       context: .
       dockerfile: Dockerfile
       tags:
-        - mrlionbyte/maxsportapp:v2.1.2
-    image: mrlionbyte/maxsportapp:v2.1.2
+        - mrlionbyte/maxsportapp:v2.1.2-development
+    image: mrlionbyte/maxsportapp:v2.1.2-development
     volumes:
-      - static_volume:/MaxSports/staticfiles
-      - ./media:/MaxSports/media
-      - ./media:/maxsport/media:z
-      - .:/MaxSports
+      - static_volume:/maxsport/staticfiles # Changed to /maxsport
+      - ./media:/maxsport/media             # Changed to /maxsport
+      - .:/maxsport
     ports:
       - 8000:8000
     container_name: MaxSport_Container
     depends_on:
       - db
-    command: gunicorn -w 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50 MaxSports.wsgi:application -b 0.0.0.0:8000
+    # command: gunicorn -w 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50 MaxSports.wsgi:application -b 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     env_file:
       - .env
     restart: unless-stopped

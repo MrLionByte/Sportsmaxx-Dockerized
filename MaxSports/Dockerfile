@@ -27,4 +27,6 @@ USER djangouser
 
 COPY --chown=djangouser:djangouser entrypoint.sh /maxsport/entrypoint.sh
 
-ENTRYPOINT ["/maxsport/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# ENTRYPOINT ["/maxsport/entrypoint.sh"]

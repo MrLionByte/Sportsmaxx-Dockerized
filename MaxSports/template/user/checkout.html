@@ -10,15 +10,15 @@
 {% for message in messages %}
 {% if message.tags == 'error' %}
 <script>
-swal("Error!", "{{ message }}", "error"); // Display error message with a warning icon
+swal("Error!", "{{ message }}", "error"); 
 </script>
 {% elif message.tags == 'success' %}
 <script>
-swal("Success!", "{{ message }}", "success"); // Display success message with a success icon
+swal("Success!", "{{ message }}", "success"); 
 </script>
 {% else %}
 <script>
-swal("Message", "{{ message }}"); // Display general message
+swal("Message", "{{ message }}"); 
 </script>
 {% endif %}
 {% endfor %}
@@ -56,8 +56,10 @@ swal("Message", "{{ message }}"); // Display general message
                         {% else %}
                         <h6 class="text-danger">Without address you can't order </h6>
                         {% endif %}
-                        <a style="background-color: blue;" class="mr-5 primary-btn" href="{% url 'add_checkout_address' %}?next={{ requst.path }}">Add Address</a>
-           
+                        <a style="background-color: blue;" class="mr-5 primary-btn" 
+                            href="{% url 'add_checkout_address' %}?next={{ request.path }}">
+                                Add Address
+                        </a>
                         <a style="background-color: rgb(255, 140, 0);" class="ml-5 primary-btn" href="{% url 'cart_show' %}">Cancel</a>
                         <div class="col-md-12 form-group">
                            
@@ -216,7 +218,7 @@ swal("Message", "{{ message }}"); // Display general message
                             order_id: data.id,
                             name: data.name,
                             description: data.description,
-                            image: data.image,
+                            image: "https://sportsmaxx.farhanmn.site/static/img/sortsMax_logo.png",
                             handler: function(response) {
                                 if (response.razorpay_payment_id) {
                                     Swal.fire({
@@ -326,7 +328,7 @@ swal("Message", "{{ message }}"); // Display general message
                 timer: 4000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = "/payment-failure/";
+                window.location.href = "/payment/failure/";
             });
         }
     });

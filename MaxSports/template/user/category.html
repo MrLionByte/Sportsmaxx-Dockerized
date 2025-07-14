@@ -138,13 +138,13 @@
 		</div>
 		{% block search_option %}
 		<div class="search_input" id="search_input_box">
-			<div class="container">
-				<form class="d-flex justify-content-between" action="{% url 'all_products_list' %}" method="post">
-					{% csrf_token %}
+			<div class="d-flex justify-content-between">
+				<!-- <form class="d-flex justify-content-between" action="{% url 'all_products_list' %}" method="post">
+					{% csrf_token %} -->
 					<input type="text" class="form-control" id="search_input" placeholder="Search Here" name="search" autocomplete="off">
 					<button type="submit" class="btn"></button>
 					<span class="lnr lnr-cross" id="close_search" title="Close Search"></span>
-				</form>
+				<!-- </form> -->
 			</div>
 		</div>
 		{% endblock search_option %}
@@ -173,255 +173,254 @@
 	</section>
 	<!-- End Banner Area -->
 
-	{% block section_data %}
-	<!-- Select Categories ( Browse ) -->
-	<div class="container">
-		<div class="row">
-			<div class="col-xl-3 col-lg-4 col-md-5">
-				{% block category_browse %}
-					<!-- Category Browse -->
-					<div class="sidebar-categories">
-						<div class="head">Browse Categories</div>
-						{% if category_data %}
-						<form action="{% url 'all_products_list' %}" method="post" class="filter-form">
-							{% csrf_token %}
-							<input type="hidden" name="filter_type" value="variant_form">
-							<div class="main-categories">
-								{% for data in category_data %}
-								<div class="main-nav-list">
-									<input class="pixel-radio" type="radio" id="category_{{ data.pk }}" name="category_name" value="{{ data.pk }}">
-									<label for="category_{{ data.pk }}">{{ data.category_name }}</label>
-								</div>
-								{% endfor %}
-							</div>
-						</form>
-						{% endif %}
-					</div>
-					<!-- End Category Browse -->
-				{% endblock category_browse %}
-				<!-- Select Categories ( Browse ) -->
-				<!-- Select Filters ( Filters ) -->
-          <!-- Variant Filters -->
-		  <div class="sidebar-filter">
-			<div class="top-filter-head">Variant Filters</div>
-			<!-- Variant Filter -->
-			<div class="common-filter">
-				<div class="head">Variant</div>
-				<form action="{% url 'all_products_list' %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="filter" value="filter">
-					<input type="hidden" name="filter_type" value="variant_form">
-					<ul>
-						{% for variant_name in unique_variant_names %}
-						<li class="filter-list">
-							<input class="pixel-radio" type="radio" id="variant_{{ forloop.counter }}" name="variant_name" value="{{variant_name}}">
-							<label for="variant_{{ forloop.counter }}">{{variant_name}}</label>
-						</li>
-						{% endfor %}
-					</ul>
-				</form>
-			</div>
-			<!-- Color Filter -->
-			<div class="common-filter">
-				<div class="head">Color</div>
-				<form action="{% url 'all_products_list' %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="filter" value="filter_form">
-					<ul>
-						{% for color_names in unique_color_names %}
-						<li class="filter-list">
-							<input class="pixel-radio" type="radio" id="color_{{ forloop.counter }}" name="color" value="{{color_names}}">
-							<label for="color_{{ forloop.counter }}">{{color_names}}</label>
-						</li>
-						{% endfor %}
-					</ul>
-				</form>
-			</div>
-			<!-- Price Filter -->
-			<div class="common-filter">
-				<div class="head">Price</div>
-				<form action="{% url 'all_products_list' %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="priceRange" value="price">
-					<div class="price-range-area">
-						<input type="text" name="lower_value" id="lower-value-input" placeholder="Min price" autocomplete="off">
-						<input type="text" name="upper_value" id="upper-value-input" placeholder="Max price" autocomplete="off">
-					</div>
-					<button class="btn-primary mt-3" type="submit">Apply Filter</button>
-				</form>
-			</div>
-		</div>
-		<!-- End Variant Filters -->
 
-			</div>
-			<div class="col-xl-9 col-lg-8 col-md-7">
-				<!-- Start Filter Bar -->
-				
-				<div class="filter-bar d-flex flex-wrap align-items-center">
-					{% block filterbased %}
-					<div class="sorting">
-						<select id="sort-select">
-							<option value="1"> New Arrival </option>
-							<option value="2">High to Low</option>
-							<option value="3">Low to High</option>
-							<option value="4"> A - Z </option>
-							<option value="5"> Z - A </option>
-							<option value="6">Featured</option>
-						</select>
-					</div>
-					{% endblock filterbased %}
-					<div class="sorting mr-auto">
+{% block section_data %}
+<div class="container">
+    <div class="row">
+        <div class="col-xl-3 col-lg-4 col-md-5">
+            {% block category_browse %}
+            <div class="sidebar-categories">
+                <div class="head">Browse Categories</div>
+
+                {% if category_data %}
+                <div class="main-categories">
+                    {% for data in category_data %}
+                    <div class="main-nav-list">
+                        <a href="#"
+   								class="filter-link category-filter"
+   								data-filter-type="category"
+ 								data-filter-value="{{ data.pk }}">	
+                            <!-- <span class="pixel-radio"></span>  -->
+							<label>{{ data.category_name }}</label>
+                        </a>
+                    </div>
 					
-					</div>
-					<div class="pagination">
-						{% block pagination_up %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endblock category_browse %}
+            <div class="sidebar-filter">
+                <div class="top-filter-head">Variant Filters</div>
+                <div class="common-filter">
+                    <div class="head">Variant</div>
+                    <ul>
+                        {% for variant_name in unique_variant_names %}
+                        <li class="filter-list">
+                            <a href="{% url 'all_products_list' %}?variant_name={{ variant_name }}" class="filter-link variant-filter" data-filter-type="variant" data-filter-value="{{ variant_name }}">
+                                <!-- <span class="pixel-radio"></span>  -->
+								<label>{{ variant_name }}</label>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="common-filter">
+                    <div class="head">Color</div>
+                    <ul>
+                        {% for color_name in unique_color_names %}
+                        <li class="filter-list">
+                            <a href="{% url 'all_products_list' %}?color={{ color_name }}" class="filter-link color-filter" data-filter-type="color" data-filter-value="{{ color_name }}">
+                                <!-- <span class="pixel-radio"></span>  -->
+								<label>{{ color_name }}</label>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
-						{% if all_products.has_previous %}
-            					<a href="?page={{ all_products.previous_page_number }}" class="prev-arrow">
-                				<i class="fa fa-long-arrow-left" aria-hidden="true"></i>
-            					</a>
-        				{% endif %}
-
-        						<!-- <a href="?page={{ all_products.number }}" class="active">{{ all_products.number }}</a> -->
-        
-        				{% for num in all_products.paginator.page_range %}
-            				{% if num != all_products.number %}
-                				{% if num > all_products.number|add:'-2' and num < all_products.number|add:'2' %}
-                    				<a href="?page={{ num }}">{{ num }}</a>
-                				{% endif %}
-            				{% endif %}
-        				{% endfor %}
-        
-									<a href="#" class="dot-dot"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a>
-									<a href="?page={{ all_products.paginator.num_pages }}">{{ all_products.paginator.num_pages }}</a>
-        
-						{% if all_products.has_next %}
-							<a href="?page={{ all_products.next_page_number }}" class="next-arrow">
-								<i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-							</a>
-						{% endif %}
-						{% endblock pagination_up %}
-
-					</div>
+                <div class="common-filter">
+                    <div class="head">Price</div>
+                    <div class="price-range-area">
+                        <input type="text" name="lower_value" id="lower-value-input" placeholder="Min price" autocomplete="off" value="{{ request.GET.lower_value|default:'' }}">
+                        <input type="text" name="upper_value" id="upper-value-input" placeholder="Max price" autocomplete="off" value="{{ request.GET.upper_value|default:'' }}">
+                    </div>
+                <div class="d-flex justify-content-between mt-3">
+					<button class="btn btn-primary" type="button" id="apply-all-filters">Apply Filters</button>
+					<button class="btn btn-outline-danger" type="button" id="clear-all-filters">Clear Filters</button>
 				</div>
-				<!-- End Filter Bar -->
-				{% block section_messages %}
-				{% endblock section_messages %}
-				<!-- Start Best Seller -->
-				<section class="lattest-product-area pb-40 category-list">
-					<div class="row">
+				</div>
+				
+            </div>
+            </div>
+        <div class="col-xl-9 col-lg-8 col-md-7">
+            <div class="filter-bar d-flex flex-wrap align-items-center">
+			
+			{% block filterbased %}
+			<div class="d-flex align-items-center gap-3">
+			<div class="sorting w-auto">
+				<select id="sort-select" class="form-select">
+				<option value="">-- Sort By --</option>
+				<option value="1" {% if request.GET.sort_id == '1' %}selected{% endif %}>New Arrival</option>
+				<option value="2" {% if request.GET.sort_id == '2' %}selected{% endif %}>High to Low</option>
+				<option value="3" {% if request.GET.sort_id == '3' %}selected{% endif %}>Low to High</option>
+				<option value="4" {% if request.GET.sort_id == '4' %}selected{% endif %}>A - Z</option>
+				<option value="5" {% if request.GET.sort_id == '5' %}selected{% endif %}>Z - A</option>
+				<option value="6" {% if request.GET.sort_id == '6' %}selected{% endif %}>Featured</option>
+				</select>
+			</div>
 
-						{% block load_product %}
-						{% if all_products %}
-						{% for product in all_products %}
-						<div class="col-lg-4 col-md-6">
-							<div class="single-product d-flex flex-column">
-								<a href="{% url 'product_details' product.pk %}">
-								{% if not product.product_size_qty.all %}
-								<div class="stamp" style="position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; background-color: red;
+			</div>
+			{% endblock filterbased %}
+
+
+
+                <div class="sorting mr-auto">
+
+                </div>
+                <div class="pagination">
+                    {% block pagination_up %}
+
+                    {% if all_products.has_previous %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.previous_page_number }}" class="prev-arrow">
+                        <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+
+                    {% for num in all_products.paginator.page_range %}
+                    {% if num != all_products.number %}
+                    {% if num > all_products.number|add:'-2' and num < all_products.number|add:'2' %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ num }}" class="{% if num == all_products.number %}active{% endif %}">{{ num }}</a>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                    <a href="#" class="dot-dot"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a>
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.paginator.num_pages }}">{{ all_products.paginator.num_pages }}</a>
+
+                    {% if all_products.has_next %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.next_page_number }}" class="next-arrow">
+                        <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+                    {% endblock pagination_up %}
+
+                </div>
+            </div>
+            {% block section_messages %}
+				{% if messages %}
+					<script>
+					document.addEventListener("DOMContentLoaded", function () {
+						{% for message in messages %}
+						Swal.fire({
+							icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+							title: '{{ message|escapejs }}',
+							timer: 2500,
+							showConfirmButton: false
+						});
+						{% endfor %}
+					});
+					</script>
+				{% endif %}
+			{% endblock section_messages %}
+
+
+            <section class="lattest-product-area pb-40 category-list">
+                <div class="row">
+
+                    {% block load_product %}
+                    {% if all_products %}
+                    {% for product in all_products %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="single-product d-flex flex-column">
+                            <a href="{% url 'product_details' product.pk %}">
+                                {% if not product.product_size_qty.all %}
+                                <div class="stamp" style="position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; background-color: red;
 								color: white; display: flex; justify-content: center; align-items: center;">OUT OF STOCK</div>
-									{% endif %}
-								{% if product.featured %}
-								<div class="stamp" style="position: absolute; top: 10px; left: 10px;
+                                {% endif %}
+                                {% if product.featured %}
+                                <div class="stamp" style="position: absolute; top: 10px; left: 10px;
 								color: white; display: flex; justify-content: center; align-items: center;">
-									<img width="25" height="25" src="https://img.icons8.com/ios-filled/50/000000/filled-star.png" alt="filled-star"/>
-								</div>
-								{% endif %}
-								<img style="width: 255px; height: 255px; border-radius: 25px;" class="img-fluid" src="{{ product.image_first.url }}" alt=""></a>
-								<a href="{% url 'add_to_wishlist' product.pk %}?next={{request.path}}" id="add-to-wishlist-button" class="btn btn-outline-info w-75 ml-4" data-product-id="{{ data.pk }}">Add to wishlist</a>
-								
-								<div class="product-details text-center p-2">
-									<h6>{{product.product_id}}</h6>
-									<div class="price">
-										<h6>₹ {{ product.product_id.product_price_after }}</h6>
-										
-										{% if product.status %}
-										<h6 class="l-through">₹ {{ product.product_id.product_price }} </h6>
-										{% if product.product_id.offer_percentage >= product.product_id.category_id.offer_percentage %}
-											<span class="text-dark">(% {{product.product_id.offer_percentage}})</span>
-										{% else %}
-											<span class="text-dark">(% {{product.product_id.category_id.offer_percentage}})</span>
-										{% endif %}
-										{% endif %}
-									</div>
-									
-									<div class="prd-bottom">
-										<a href="{% url 'product_details' product.pk %}">
-											<!-- <p class="hover-text"> Details</p> -->
-										</a>
-									   
-									</div>
-								</div>
-							</div>
-						</div>
-					
-						{% endfor %}
-						{% else %}
-						<div class="col-lg-4 col-md-6">
-							<div class="single-product">
-								<h3 class="text-warning">No Product Available in this category</h3>
-							</div>
-						</div>
-						{% endif %}
-						{% endblock load_product %}
-						
-					</div>
-				</section>
-				<!-- End Best Seller -->
-				
+                                    <img width="25" height="25" src="https://img.icons8.com/ios-filled/50/000000/filled-star.png" alt="filled-star" />
+                                </div>
+                                {% endif %}
+                                <img style="width: 255px; height: 255px; border-radius: 25px;" class="img-fluid" src="{{ product.image_first.url }}" alt=""></a>
+                            
+								<a href="{% url 'add_to_wishlist' product.pk %}?next={{ request.get_full_path|urlencode }}" 
+									class="btn btn-outline-info w-75 ml-4">
+									Add to wishlist
+								</a>
 
-				<!-- Start Filter Bar -->
-				<div class="filter-bar d-flex flex-wrap align-items-center mb-3">
-					<div class="sorting mr-auto">
-						<!-- <select>
-							<option value="1">Show 9</option>
-							<option value="1">Show 12</option>
-							<option value="1">Show 15</option>
-						</select> -->
-					</div>
-					
- 					<div class="pagination">
-						{% block pagination_down %}
 
-						{% if all_products.has_previous %}
-            					<a href="?page={{ all_products.previous_page_number }}" class="prev-arrow">
-                				<i class="fa fa-long-arrow-left" aria-hidden="true"></i>
-            					</a>
-        				{% endif %}
+                            <div class="product-details text-center p-2">
+                                <h6>{{product.product_id}}</h6>
+                                <div class="price">
+                                    <h6>₹ {{ product.product_id.product_price_after }}</h6>
 
-        						<!-- <a href="?page={{ all_products.number }}" class="active">{{ all_products.number }}</a> -->
-        
-        				{% for num in all_products.paginator.page_range %}
-            				{% if num != all_products.number %}
-                				{% if num > all_products.number|add:'-2' and num < all_products.number|add:'2' %}
-                    				<a href="?page={{ num }}">{{ num }}</a>
-                				{% endif %}
-            				{% endif %}
-        				{% endfor %}
-        
-									<a href="#" class="dot-dot"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a>
-									<a href="?page={{ all_products.paginator.num_pages }}">{{ all_products.paginator.num_pages }}</a>
-        
-						{% if all_products.has_next %}
-							<a href="?page={{ all_products.next_page_number }}" class="next-arrow">
-								<i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-							</a>
-						{% endif %}
+                                    {% if product.status %}
+                                    <h6 class="l-through">₹ {{ product.product_id.product_price }} </h6>
+                                    {% if product.product_id.offer_percentage >= product.product_id.category_id.offer_percentage %}
+                                    <span class="text-dark">(% {{product.product_id.offer_percentage}})</span>
+                                    {% else %}
+                                    <span class="text-dark">(% {{product.product_id.category_id.offer_percentage}})</span>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
 
-						{% endblock pagination_down %}
-					</div>
-				</div>
-				<!-- End Filter Bar -->
-			</div>
-		</div>
-	</div>
+                                <div class="prd-bottom">
+                                    <a href="{% url 'product_details' product.pk %}">
+                                        </a>
 
-	{% block  related_product_area_section_gap %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-	<!-- End related-product Area -->
-	{% endblock related_product_area_section_gap %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="single-product">
+                            <h3 class="text-warning">No Product Available in this category</h3>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endblock load_product %}
 
-	{% endblock section_data %}
+                </div>
+            </section>
+            <div class="filter-bar d-flex flex-wrap align-items-center mb-3">
+                <div class="sorting mr-auto">
+                    </div>
+
+                <div class="pagination">
+                    {% block pagination_down %}
+
+                    {% if all_products.has_previous %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.previous_page_number }}" class="prev-arrow">
+                        <i class="fa fa-long-arrow-left" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+
+                    {% for num in all_products.paginator.page_range %}
+                    {% if num != all_products.number %}
+                    {% if num > all_products.number|add:'-2' and num < all_products.number|add:'2' %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ num }}" class="{% if num == all_products.number %}active{% endif %}">{{ num }}</a>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                    <a href="#" class="dot-dot"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></a>
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.paginator.num_pages }}">{{ all_products.paginator.num_pages }}</a>
+
+                    {% if all_products.has_next %}
+                    <a href="?{{ request.GET.urlencode }}&page={{ all_products.next_page_number }}" class="next-arrow">
+                        <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+
+                    {% endblock pagination_down %}
+                </div>
+            </div>
+            </div>
+    </div>
+</div>
+
+{% block related_product_area_section_gap %}
+
+{% endblock related_product_area_section_gap %}
+
+{% endblock section_data %}
+
 
 	{% block footer_area %}
 	<!-- start footer Area -->
@@ -570,48 +569,122 @@
 	</div>
 
 
-	{% block extra_script %}
-	<script>
-		$(document).ready(function() {
-			$("#sort-select_page").change(function() {
-				var selectedOption = $(this).val();
-				if (selectedOption) {
-					window.location.href = "{% url 'all_products_list' %}?page_content_count=" + selectedOption;
-				}
-			});
-		});
+{% block extra_script %}
+<script>
+$(document).ready(function () {
+    const selectedFilters = {};
 
-		$(document).ready(function() {
-			$('#sort-select').change(function() {
-				var selectedOption = $(this).val();
-				if (selectedOption) {
-					window.location.href = "{% url 'all_products_list' %}?sort_id=" + selectedOption;
-				}
-			});
-		});
+    const currentParams = new URLSearchParams(window.location.search);
+    if (currentParams.get("sort_id")) {
+        selectedFilters['sort_id'] = currentParams.get("sort_id");
+    }
 
-		document.addEventListener('DOMContentLoaded', function() {
-    $( "#price-range" ).slider({
-        range: true,
-        min: 0,
-        max: 1000,
-        values: [ 75, 300 ],
-        slide: function( event, ui ) {
-            $( "#lower-value" ).text( "₹" + ui.values[ 0 ] );
-            $( "#upper-value" ).text( "₹" + ui.values[ 1 ] );
-          
-            $( "#lower-value-input" ).val(ui.values[ 0 ]);
-            $( "#upper-value-input" ).val(ui.values[ 1 ]);
-            
-            console.log("Lower value:", ui.values[0]);
-            console.log("Upper value:", ui.values[1]);
-    
-            document.getElementById('your-form-id').submit();
+    function updateUrlParams(paramsObj) {
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.searchParams;
+
+        searchParams.delete('page');
+
+        for (const key in paramsObj) {
+            if (paramsObj[key]) {
+                searchParams.set(key, paramsObj[key]);
+            } else {
+                searchParams.delete(key);
+            }
         }
+
+        window.location.href = currentUrl.origin + currentUrl.pathname + '?' + searchParams.toString();
+    }
+
+    $('.filter-link').on('click', function (e) {
+        e.preventDefault();
+        const type = $(this).data('filter-type');
+        const value = $(this).data('filter-value');
+
+        if (selectedFilters[type] === value) {
+            delete selectedFilters[type];
+        } else {
+            selectedFilters[type] = value;
+        }
+
+        $('.filter-link[data-filter-type="' + type + '"]').removeClass('active-filter');
+        $(this).addClass('active-filter');
     });
+
+    // ✅ Sort should apply immediately on change
+    $('#sort-select').on('change', function () {
+        const sortId = $(this).val();
+        const url = new URL(window.location.href);
+
+        if (sortId) {
+            url.searchParams.set("sort_id", sortId);
+        } else {
+            url.searchParams.delete("sort_id");
+        }
+        url.searchParams.delete("page");
+        window.location.href = url.toString();
+    });
+
+    $('#apply-all-filters').on('click', function () {
+        const lower = $('#lower-value-input').val();
+        const upper = $('#upper-value-input').val();
+
+        selectedFilters['lower_value'] = lower;
+        selectedFilters['upper_value'] = upper;
+
+        updateUrlParams(selectedFilters);
+    });
+
+    $('#clear-all-filters').on('click', function () {
+        window.location.href = window.location.pathname;
+    });
+
+    function highlightActiveFilters() {
+        const currentParams = new URLSearchParams(window.location.search);
+
+        $('.filter-link').each(function () {
+            const $link = $(this);
+            const type = $link.data('filter-type');
+            const value = $link.data('filter-value');
+            if (currentParams.get(type) === value) {
+                $link.addClass('active-filter');
+                $link.find('.pixel-radio').addClass('checked');
+            } else {
+                $link.removeClass('active-filter');
+                $link.find('.pixel-radio').removeClass('checked');
+            }
+        });
+
+        const lowerInput = $('#lower-value-input');
+        const upperInput = $('#upper-value-input');
+        if (currentParams.get('lower_value') || currentParams.get('upper_value')) {
+            lowerInput.addClass('active-price-filter');
+            upperInput.addClass('active-price-filter');
+        }
+    }
+
+    highlightActiveFilters();
 });
-		</script>
-	{% endblock extra_script %}
+</script>
+
+<style>
+    .active-filter {
+        font-weight: bold;
+        color: #007bff !important;
+    }
+
+    .pixel-radio.checked {
+        background-color: #007bff;
+    }
+
+    .active-price-filter {
+        border: 2px solid #007bff;
+    }
+</style>
+{% endblock extra_script %}
+
+
+
 	<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
 	 crossorigin="anonymous"></script>

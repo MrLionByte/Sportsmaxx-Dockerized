@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -8,6 +9,7 @@ from .models import user_address, Image as IMG, referral
 from order_app.models import Order
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import authenticate, login
+from django.urls import reverse
 
 from all_validator import views
 
@@ -15,7 +17,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
 # Create your views here.
-
+logger = logging.getLogger(__name__)
 
 # =========    Admin Profile handle    =========== #
 # =========    ============    =========== #
@@ -70,6 +72,8 @@ def user_profile(request):
 def add_account_address(request):
     storage = messages.get_messages(request)
     storage.used = True
+
+    print("<<<>>> At add address")
 
     if request.method == "POST":
         username = request.user.username
@@ -174,6 +178,7 @@ def edit_address(request, address_id):
     context = {
         "user_details": addresses,
     }
+    print(">>>>>>>> At edit address")
     if request.method == "POST":
 
         full_name = request.POST.get("full_name")
@@ -392,6 +397,8 @@ def add_checkout_address(request):
     storage = messages.get_messages(request)
     storage.used = True
 
+    logger.info("At Add checkout address")
+
     if request.method == "POST":
         username = request.user.username
         user_data = User.objects.get(username=username)
@@ -470,14 +477,21 @@ def add_checkout_address(request):
             phone_no=phone,
             full_name=full_name,
         )
+        logger.info(f"Data arranged for at {data}.")
         try:
             data.full_clean()
             data.save()
+            logger.info(f"Data saved for at {data}.")
+        
             messages.success(request, "Address added")
-            return redirect("checkout_product")
+            next_url = request.GET.get("next") or request.POST.get("next") or reverse("checkout_product")
+            print("NEXT :", {next_url})
+            return redirect(next_url)
         except Exception as e:
+            logger.error(f"error occurred {str(e)}.")
             messages.error(request, f"Error ! {e}")
-    return render(request, "user/add_address.html",{'checkout_product': True})
+    
+    return render(request, "user/add_address.html",{'check_out': True})
 
 
 # =========  Checkout End address details  =========== #
