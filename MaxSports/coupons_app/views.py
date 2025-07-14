@@ -9,7 +9,8 @@ from all_validator import views
 
 # Create your views here.
 date_now = (timezone.now()).date()
-
+from django.utils.timezone import now as tz_now
+from datetime import datetime
 
 # < =======    COUPON  GENERATOR    ======= >
 
@@ -167,93 +168,118 @@ def coupons_expired(request):
 
 # < =======  Edit COUPON   ======= >
 
-
 @user_passes_test(lambda u: u.is_superuser, login_url="/admin_login/")
 def edit_coupon(request, coupon_id):
     storage = messages.get_messages(request)
     storage.used = True
 
-    next_url = request.GET.get("next")
+    next_url = request.GET.get("next", "/admin_coupons/")
     coupon = Coupons.objects.get(id=coupon_id)
     context = {"coupon": coupon, "coupon_id": coupon_id}
 
     if request.method == "POST":
-        coupon_title = (request.POST.get("title")).strip()
+        coupon_title = request.POST.get("title", "").strip()
         min_price = request.POST.get("min")
         max_price = request.POST.get("max")
         valid = request.POST.get("valid")
         expiry = request.POST.get("expiry")
         discountPercentage = request.POST.get("discountPercentage")
         choice = request.POST.get("choice")
+
         try:
-            if coupon_title is not None:
+            if coupon_title:
                 check_title = views.name_test(coupon_title)
                 if check_title[0] is True:
                     messages.error(request, check_title[1])
-                    return redirect(next_url, coupon_id)
+                    return redirect(next_url)
                 coupon.title = coupon_title
-            if min_price is not None:
-                if float(min_price) > float(max_price):
-                    messages.error(request, "Min price should be less than max price")
-                    return redirect(next_url, coupon_id)
+
+            if min_price and max_price:
+                try:
+                    min_price = float(min_price)
+                    max_price = float(max_price)
+                except ValueError:
+                    messages.error(request, "Prices must be numbers.")
+                    return redirect(next_url)
+
+                if min_price > max_price:
+                    messages.error(request, "Min price should be less than max price.")
+                    return redirect(next_url)
+
                 check_min = views.price_test(min_price)
                 if check_min[0] is True:
                     messages.error(request, check_min[1])
-                    return redirect(next_url, coupon_id)
-                coupon.min_limit = min_price
-            if max_price is not None:
-                if float(max_price) < float(min_price):
-                    messages.error(request, "Min price should be less than max price")
-                    return redirect(next_url, coupon_id)
+                    return redirect(next_url)
+
                 check_max = views.price_test(max_price)
                 if check_max[0] is True:
                     messages.error(request, check_max[1])
-                    return redirect(next_url, coupon_id)
-                coupon.max_limit = max_price
-            if valid is not None:
-                if valid < str(date_now):
-                    messages.error(request, "Give proper Valid From date")
                     return redirect(next_url)
-                elif valid > expiry:
-                    messages.error(request, "valid date should be less than expiry")
-                    return redirect(next_url)
-                coupon.valid_from = valid
-            if expiry is not None:
-                if expiry <= str(date_now):
-                    messages.error(request, "Give proper Expiry date")
-                    return redirect(next_url)
-                elif valid > expiry:
-                    messages.error(request, "valid date should be less than expiry")
-                    return redirect(next_url)
-                coupon.expiry = expiry
 
-            if discountPercentage is not None:
+                coupon.min_limit = min_price
+                coupon.max_limit = max_price
+
+            date_now = tz_now().date()
+            if valid:
+                try:
+                    valid_date = datetime.strptime(valid, "%Y-%m-%d").date()
+                except ValueError:
+                    messages.error(request, "Invalid valid-from date format.")
+                    return redirect(next_url)
+
+                if valid_date < date_now:
+                    messages.error(request, "Give proper Valid From date (not in past).")
+                    return redirect(next_url)
+
+                coupon.valid_from = valid_date
+
+            if expiry:
+                try:
+                    expiry_date = datetime.strptime(expiry, "%Y-%m-%d").date()
+                except ValueError:
+                    messages.error(request, "Invalid expiry date format.")
+                    return redirect(next_url)
+
+                if expiry_date <= date_now:
+                    messages.error(request, "Give proper Expiry date (should be future).")
+                    return redirect(next_url)
+
+                if valid and valid_date > expiry_date:
+                    messages.error(request, "Valid-from date should be less than expiry.")
+                    return redirect(next_url)
+
+                coupon.expiry = expiry_date
+
+            if discountPercentage:
+                try:
+                    discount = float(discountPercentage)
+                except ValueError:
+                    messages.error(request, "Discount must be a number.")
+                    return redirect(next_url)
+
                 if choice == "per":
-                    check_discountPer = views.percentage_validator(discountPercentage)
+                    check_discountPer = views.percentage_validator(discount)
                     if check_discountPer[0] is True:
                         messages.error(request, check_discountPer[1])
                         return redirect(next_url)
-                    else:
-                        check_discountAmt = views.price_test(discountPercentage)
-                        if check_discountAmt[0] is True:
-                            messages.error(request, check_discountAmt[1])
-                            return redirect(next_url)
-                        coupon.discount_percentage = discountPercentage
+                    coupon.discount_percentage = discount
+                    coupon.discount_amount = None
                 else:
-                    if float(discountPercentage) > float(max_price) or float(
-                        discountPercentage
-                    ) > float(min_price):
-                        messages.error(
-                            request, "Discount is should be less than minimum price"
-                        )
+                    if min_price and discount > min_price:
+                        messages.error(request, "Discount should be less than minimum price.")
                         return redirect(next_url)
-                    coupon.discount_amount = discountPercentage
+
+                    coupon.discount_amount = discount
+                    coupon.discount_percentage = None 
+
             coupon.save()
-            messages.success(request, f"Edited {coupon_title} successfully")
+            messages.success(request, f"Edited {coupon.title} successfully")
+            return redirect(next_url)
+
         except Coupons.DoesNotExist:
+            messages.error(request, "Coupon not found.")
             return redirect(next_url)
 
     return render(request, "admin/admin_coupon_edit.html", context)
-
 
 # < ======= END Edit COUPON ======= >

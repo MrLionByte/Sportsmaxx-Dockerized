@@ -246,7 +246,6 @@ def update_total_price(request):
     cart.total_amount_without_coupon = total_amount_final
     cart.save()
 
-    date_now = datetime.now().date()
     available_coupons = Coupons.objects.filter(
         min_limit__lte=total_amount_final,
         max_limit__gte=total_amount_final,

@@ -82,9 +82,9 @@ swal("Message", "{{ message }}"); // Display general message
                   <div class="col-6">
                     <br>
                       <label for="percentage" style="margin-left: 15px;">Percentage</label>
-                      <input  type="radio" id="percentage" required name="choice" value="per"/><br>
-                      <label for="amount" style="margin-left: 15px;">Amount</label>
-                      <input  type="radio" id="amount" required name="choice" value="amt"/>
+                      <input type="radio" name="choice" value="per" {% if coupon.discount_percentage %}checked{% endif %}>
+                      <label for="percentage" style="margin-left: 15px;">Amount</label>
+                      <input type="radio" name="choice" value="amt" {% if coupon.discount_amount %}checked{% endif %}>
                    </div>
                   </div>
                 <button type="submit" class="btn btn-primary m-3">Submit</button>

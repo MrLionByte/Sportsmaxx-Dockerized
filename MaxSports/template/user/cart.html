@@ -130,7 +130,7 @@
               
               <tr>
                 <td colspan="3" class="text-end fw-semibold">Shipping Fee:</td>
-                <td colspan="2">₹ 150</td>
+                <td colspan="2">₹ 150 (Free For above ₹5000)</td>
               </tr>
               <tr>
                 <td colspan="3" class="text-end fw-semibold">Coupon Discount:</td>
@@ -228,6 +228,36 @@ function showSuccess(message) {
         showConfirmButton: false
     });
 }
+
+function updateAvailableCoupons(coupons) {
+    const container = document.querySelector(".cart_area td[colspan='5'] .d-flex > div:first-child");
+
+    if (!container) return;
+
+    let html = "<strong>Available Coupons:</strong><br>";
+
+    if (coupons.length === 0) {
+        html += `<span class="text-danger">No Available Coupon</span>`;
+    } else {
+        coupons.forEach(coupon => {
+            const discountText = coupon.discount_amount
+                ? `₹${coupon.discount_amount}`
+                : `${coupon.discount_percentage}%`;
+
+            html += `
+                <p class="mb-1">
+                    <span>${coupon.title}</span> -
+                    <span class="text-info">${coupon.code}</span>
+                    <span>(Discount: ${discountText})</span>
+                    <span onclick="copyToClipboard('${coupon.code}')" style="cursor: pointer; color: blue;">&#128203;</span>
+                </p>
+            `;
+        });
+    }
+
+    container.innerHTML = html;
+}
+
 
 function updateQuantity(productId, action) {
     const quantityInput = document.getElementById("qty-" + productId);
