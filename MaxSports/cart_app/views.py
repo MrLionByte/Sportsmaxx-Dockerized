@@ -160,22 +160,26 @@ def remove_from_cart(request):
     delete_id = request.GET.get("delete_id")
 
     if not delete_id:
+        logger.error(f"Invalid cart item ID.")
         messages.error(request, "Invalid cart item ID.")
         return redirect("cart_show")
 
     try:
         cart_product = Cart_products.objects.get(id=delete_id)
     except Cart_products.DoesNotExist:
+        logger.error(f"Cart item not found. request id: {delete_id}")
         messages.error(request, "Cart item not found.")
         return redirect("cart_show")
 
     try:
         users_cart = Cart.objects.get(user_id=request.user)
     except Cart.DoesNotExist:
+        logger.error(f"Users card not exist, request id: {delete_id}, user : {request.user}")
         messages.error(request, "Your cart does not exist.")
         return redirect("cart_show")
 
     if cart_product.cart != users_cart:
+        logger.error(f"User not have authorization, cart product: {cart_product}, user : {request.user}")
         messages.error(request, "Unauthorized cart item removal.")
         return redirect("cart_show")
 
@@ -209,7 +213,8 @@ def update_total_price(request):
 
         cart = Cart.objects.get(user_id=user)
         cart_item = Cart_products.objects.get(id=product_id, cart=cart)
-    except (Cart.DoesNotExist, Cart_products.DoesNotExist, ValueError, TypeError):
+    except (Cart.DoesNotExist, Cart_products.DoesNotExist, ValueError, TypeError) as e:
+        logger.error(f"Stock error , user : {request.user}, error : {str(e)}")
         return JsonResponse({"stockError": True, "message": "Invalid cart item."})
 
     product_variant = cart_item.product_color_variant
@@ -334,8 +339,10 @@ def apply_coupon(request):
             })
 
         except Exception as e:
+            logger.error(f"Coupon error , user : {request.user}, error : {str(e)}")
             return JsonResponse({"error": str(e)})
 
+    logger.error(f"Method is not allowed")
     return JsonResponse({"error": "Invalid request method."})
 
 
@@ -401,6 +408,7 @@ def checkout_product(request):
             "wallet": Wallet_User.objects.get(user_id=request.user),
         }
     except Cart.DoesNotExist:
+        logger.error(f"user cart not exist , user : {request.user}")
         return redirect("cart_show")
     return render(request, "user/checkout.html", context)
 
@@ -481,6 +489,7 @@ def delete_from_wishlist(request):
         cart_product.delete()
         return redirect("show_wishlist")
     except Wishlist.DoesNotExist:
+        logger.error(f"Couldn't delete cart item , user : {request.user}, request id  : {delete_id}")
         messages.error(request, "Couldn't delete cart item")
         return redirect("show_wishlist")
 

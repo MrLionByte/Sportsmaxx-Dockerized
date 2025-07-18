@@ -664,10 +664,6 @@ def all_products_list(request):
     sort_id = query_params.get("sort_id")
     page_number = query_params.get("page", 1)
 
-    print(f"Data incoming , Query: {query_params}")
-    print(f"XXXX , search_query: {search_query}, color: {color}, variant_name: {variant_name}, category_id :{category_id}")
-    print(f"YYYY , lower_value: {lower_value}, upper_value: {upper_value}, sort_id: {sort_id}, page_number :{page_number}")
-    
     filters = {
         "delete_opt": False,
         "status": True,
@@ -697,7 +693,6 @@ def all_products_list(request):
 
         product = product_color_image.objects.filter(**filters)
 
-    # Sorting
     if sort_id:
         sort_id = int(sort_id)
         if sort_id == 1:
