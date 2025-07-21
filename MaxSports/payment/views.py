@@ -81,7 +81,7 @@ def initiate_payment_for_wallet(request):
                 "key": settings.RAZORPAY_API_KEY,
                 "name": "Sports-Maxx",
                 "description": "Happy Shopping",
-                "image": "{% static 'img/sport_max_fav.png' %}",  # Ensure this path is correct
+                "image": "{% static 'img/sport_max_fav.png' %}", 
                 "order_id": order["id"],
             }
             return JsonResponse(payment_info)

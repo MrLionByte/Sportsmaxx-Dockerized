@@ -42,8 +42,6 @@ def update_wallet_balance(request):
             wallet = Wallet_User.objects.create(user_id=user)
 
         wallet_entry = Wallet_User.objects.get(user_id=user)
-        wallet_entry.balance += Decimal(amount)
-        wallet_entry.save()
 
         wallet_history = Wallet_transactions(
             wallet_id=wallet_entry,
