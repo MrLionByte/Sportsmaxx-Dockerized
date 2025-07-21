@@ -405,7 +405,7 @@ def checkout_product(request):
             "final_sum": final_sum,
             "coupon": coupon,
             "coupon_discount": coupon_discount,
-            "wallet": Wallet_User.objects.get(user_id=request.user),
+            "wallet": Wallet_User.objects.get_or_create(user_id=user),
         }
     except Cart.DoesNotExist:
         logger.error(f"user cart not exist , user : {request.user}")
